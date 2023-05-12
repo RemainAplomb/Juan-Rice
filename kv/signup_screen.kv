@@ -1,0 +1,84 @@
+#===========================================================================================================#
+
+# DEVELOPER:
+#        DIBANSA, RAHMANI 
+#   BRIEF DESCRIPTION OF THE PROGRAM:
+#        This program demonstrates a login and signup system using Firebase for authentication. 
+#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
+#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
+#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
+#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+
+#===========================================================================================================#
+
+
+#========== SIGN UP SCREEN ==========#
+# THIS SCREEN ACCOMODATES THE USER'S
+# ACCOUNT CREATION. AFTER SUCCESSFULLY
+# CREATING AN ACCOUNT, THE USER WILL 
+# BE DIRECTED BACK TO THEE START UP 
+# SCREEN.
+<SignUpScreen>:
+	FloatLayout:
+		canvas.before:
+			Rectangle:
+				pos: self.pos
+				size: self.size
+				source: "resources/backgrounds/login_background.png"
+		TextInput:
+            id: signup_username
+            hint_text: "Username"
+			halign: "center"
+			font_size: app.font_scaling * 24
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": .34, "y" :.55}
+            on_text:
+                self.focus = not self.focus if self.text.endswith("\n") else self.focus
+                #self.text = self.text.replace("\n","")
+        TextInput:
+            id: signup_password
+            password: True
+            hint_text: "Password"
+			halign: "center"
+			font_size: app.font_scaling * 24
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": .34, "y" :.43}
+            on_text:
+                self.focus = not self.focus if self.text.endswith("\n") else self.focus
+                #self.text = self.text.replace("\n","")
+		ImageButton:
+			id: SU_signup_BTN
+			source: "resources/buttons/signup.png"
+			#background_color: 0, 0, 0, 0
+			allow_stretch: True
+			keep_ratio: False
+			size_hint : 0.3, 0.05
+			pos_hint: { "x" : 0.36 , "y" : 0.28 }
+			on_release:
+				app.try_signup( signup_username.text, signup_password.text )
+				#signup_username.text = ""
+				signup_password.text = ""
+		
+		ImageButton:
+			id: SU_goBack_BTN
+			source: "resources/buttons/goBack.png"
+			#background_color: 0, 0, 0, 0
+			size_hint : 0.3, 0.05
+			pos_hint: { "x" : 0.36 , "y" : 0.2 }
+			allow_stretch: True
+			keep_ratio: False
+			on_release:
+				signup_username.text = ""
+				signup_password.text = ""
+				signup_message.text = ""
+				app.root.current = "startup_screen"
+				root.manager.transition.direction = "left"
+
+		Label:
+            id: signup_message
+			font_size: app.font_scaling * 18
+			halign: "center"
+            color: (1,0,0,1)
+            size_hint: .3, .1
+            pos_hint: {"x": 0.36 , "y" : 0.33}
+		
