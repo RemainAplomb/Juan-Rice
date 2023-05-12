@@ -171,6 +171,11 @@ class Backend_Functionalities:
             print('Error logging in: {}'.format(e))
             return None, f"Error: {e}"
     
+    def retrieve_storage(self, username, storage_type="rice"):
+        self.username = str(username).lower()
+        self.storage_type = str(storage_type).lower()
+        self.storage_ref = db.reference('users').child(self.username).child('storage').child(self.storage_type)
+        return self.storage_ref.get()
 
     def add_transaction(self, username, transaction_type, item_type, amount):
         self.username = str(username).lower()
@@ -389,6 +394,13 @@ if __name__ == "__main__":
     print(" Total Refill Transactions:")
     for item_type, total_amount in refill_transactions.items():
         print(f" {item_type}: {total_amount}")
+    print("\n--------------")
+
+    storage = pos.retrieve_storage("test_acc", "rice")
+    print("\n--------------\n")
+    print(" Total Storage:")
+    for key, value in storage.items():
+        print(f" {key}: {value}")
     print("\n--------------")
 
 

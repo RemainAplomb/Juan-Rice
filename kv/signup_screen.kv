@@ -32,6 +32,8 @@
 			font_size: app.font_scaling * 24
             size_hint: 0.35, 0.08
             pos_hint: {"x": .34, "y" :.55}
+            write_tab: False
+            multiline: False
             on_text:
                 self.focus = not self.focus if self.text.endswith("\n") else self.focus
                 #self.text = self.text.replace("\n","")
@@ -43,6 +45,8 @@
 			font_size: app.font_scaling * 24
             size_hint: 0.35, 0.08
             pos_hint: {"x": .34, "y" :.43}
+            write_tab: False
+            multiline: False
             on_text:
                 self.focus = not self.focus if self.text.endswith("\n") else self.focus
                 #self.text = self.text.replace("\n","")

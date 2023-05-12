@@ -182,6 +182,20 @@ class MainApp(App):
     def on_resize(self, *args):
         self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
         #print(f"font_scaling: {self.font_scaling*24}")
+    
+    def on_enter_statusScreen(self, username, storage_type="rice"):
+        self.max_storage = 20
+        self.rice_storage = self.backend.retrieve_storage(username, storage_type)
+
+        if self.rice_storage:
+            for key, value in self.rice_storage.items():
+                self.tempBar_value = (value / self.max_storage) * 100
+                if self.tempBar_value >= 100 :
+                    self.tempBar_value = 100
+                self.root.ids['status_screen'].ids["StatusScreen_bar_" + key].value = self.tempBar_value
+                self.root.ids['status_screen'].ids["StatusScreen_riceLabel_" + key].text = key.capitalize()
+        self.root.transition.direction = "left"
+        self.root.current = "status_screen"
 
     def prevent_keypress(self, *args):
         keycode = args[1] if len(args) > 1 else None

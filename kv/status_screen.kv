@@ -52,15 +52,15 @@
                     size: self.size
                     radius: [20, 20, 0, 0]
             VerticalBar:
-                id: bar_a
+                id: StatusScreen_bar_premium
                 value: 100
                 color: (1, 1, 1, 1)
             VerticalBar:
-                id: bar_b
+                id: StatusScreen_bar_standard
                 value: 70
                 color: (1, 1, 1, 1)
             VerticalBar:
-                id: bar_c
+                id: StatusScreen_bar_cheap
                 value: 30
                 color: (1, 1, 1, 1)
         
@@ -73,7 +73,8 @@
             color: (1, 1, 1, 1)
         
         Label:
-            text: "Premium"
+            id: StatusScreen_riceLabel_premium
+            #text: "Premium"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
@@ -81,7 +82,8 @@
             color: (1, 1, 1, 1)
         
         Label:
-            text: "Standard"
+            id: StatusScreen_riceLabel_standard
+            #text: "Standard"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
@@ -89,7 +91,8 @@
             color: (1, 1, 1, 1)
         
         Label:
-            text: "Cheap"
+            id: StatusScreen_riceLabel_cheap
+            #text: "Cheap"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
