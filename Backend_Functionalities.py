@@ -14,6 +14,7 @@
 #==========          IMPORTS          ==========#
 import time
 import datetime
+from datetime import timedelta, date
 import uuid
 import hashlib
 
@@ -56,9 +57,12 @@ class Backend_Functionalities:
         # Print the users
         # print("User database: ", self.users)
     
+    def get_current_date(self):
+        return date.today()
+    
     def convert_timestamp(self, timestamp):
-        dt_object = datetime.datetime.fromtimestamp(timestamp)
-        return dt_object.strftime("%Y-%m-%d %H:%M:%S")
+        dt_object = datetime.datetime.fromtimestamp(int(timestamp))
+        return dt_object.strftime("%m-%d %H:%M")
     
     def convert_to_hash(self, convert_this):
         return hashlib.sha256(convert_this.encode()).hexdigest()
@@ -254,6 +258,11 @@ class Backend_Functionalities:
         except Exception as e:
             # Handle error here
             print('Error adding transaction: {}'.format(e))
+    
+    def get_pricelist(self, username):
+        self.username = str(username).lower()
+        self.price_ref = db.reference('users').child(self.username).child('price')
+        return self.price_ref.get()
 
     def get_transactions_in_range(self, username, start_date, end_date):
         self.username = str(username).lower()
@@ -289,6 +298,33 @@ class Backend_Functionalities:
             print('Error getting transactions: {}'.format(e))
             return []
     
+    def get_latest_transactions(self, username, num_transactions=30):
+        self.username = str(username).lower()
+        self.transactions_ref = db.reference('users').child(self.username).child('transactions')
+
+        # Get a reference to the user's transactions, sorted in reverse chronological order
+        self.transactions = self.transactions_ref.order_by_child('timestamp').limit_to_last(num_transactions).get()
+
+        # print("Latest 30: ", self.transactions)
+
+        # If there are no transactions, return an empty list
+        if self.transactions is None:
+            return []
+
+        # Loop through the transactions and add them to the transactions_list
+        self.transactions_list = []
+        for self.transaction_id_date, self.transaction_id_data in self.transactions.items():
+            for self.transaction_id, self.transaction_data in self.transaction_id_data.items():
+                self.transaction_data['transaction_id'] = self.transaction_id
+                print(" Transaction ID: ", self.transaction_id)
+                print(" Transaction data: ", self.transaction_data)
+                self.transactions_list.append(self.transaction_data)
+
+        # Reverse the transactions_list so that they are in chronological order
+        self.transactions_list.reverse()
+
+        return self.transactions_list
+    
     def process_transactions(self, transactions):
         self.transactions = transactions
         self.sell_transactions = {}
@@ -317,6 +353,23 @@ class Backend_Functionalities:
             refill_transactions_summary[item_type] = total_amount
 
         return sell_transactions_summary, refill_transactions_summary
+    
+    def categorize_transactions(self, transactions):
+        self.transactions = transactions
+        self.sell_transactions = []
+        self.refill_transactions = []
+
+        for self.transaction in self.transactions:
+            if self.transaction["item_type"].startswith("rice"):
+                self.item_type = self.transaction["item_type"].replace("rice-", "")
+                self.transaction["item_type"] = self.item_type
+                if self.transaction['transaction_type'] == 'sell':
+                    self.sell_transactions.append(self.transaction)
+                elif self.transaction['transaction_type'] == 'refill':
+                    self.refill_transactions.append(self.transaction)
+
+        # print(self.sell_transactions)
+        return self.sell_transactions, self.refill_transactions
         
     
     
@@ -402,6 +455,9 @@ if __name__ == "__main__":
     for key, value in storage.items():
         print(f" {key}: {value}")
     print("\n--------------")
+
+    price = pos.get_pricelist("test_acc")
+    print(price)
 
 
     # Log in an existing user

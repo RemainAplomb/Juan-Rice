@@ -54,6 +54,11 @@ from kivy.graphics import Rectangle, Color
 
 from kivy.properties import ListProperty
 
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+
+from kivy.uix.label import Label
+
 
 
 
@@ -117,6 +122,9 @@ class MainScreen( Screen ):
 class StatusScreen( Screen ):
     pass
 
+class SalesScreen( Screen ):
+    pass
+
 class VerticalBar(Widget):
     value = NumericProperty(0)
     value_normalized = NumericProperty(0)
@@ -176,16 +184,16 @@ class MainApp(App):
         return Builder.load_file("main.kv") # BUILD THE KIVY APP
     
     def initialize_resources(self):
-        # Window.bind(on_resize=self.on_window_resize)
+        self.loggedIn_user = "test_acc"
         pass
 
     def on_resize(self, *args):
         self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
         #print(f"font_scaling: {self.font_scaling*24}")
     
-    def on_enter_statusScreen(self, username, storage_type="rice"):
+    def on_enter_statusScreen(self, storage_type="rice"):
         self.max_storage = 20
-        self.rice_storage = self.backend.retrieve_storage(username, storage_type)
+        self.rice_storage = self.backend.retrieve_storage(self.loggedIn_user, storage_type)
 
         if self.rice_storage:
             for key, value in self.rice_storage.items():
@@ -196,6 +204,68 @@ class MainApp(App):
                 self.root.ids['status_screen'].ids["StatusScreen_riceLabel_" + key].text = key.capitalize()
         self.root.transition.direction = "left"
         self.root.current = "status_screen"
+    
+    def on_enter_salesScreen(self):
+        if self.loggedIn_user == "":
+            self.loggedIn_user = "test_acc"
+        self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+        self.populate_sales_scroll_view(self.transactions)
+        self.root.current = "sales_screen"
+    
+    def on_salesScreen_spinner_select(self, text):
+        self.today = self.backend.get_current_date()
+        self.current_date = self.today.strftime("%Y-%m-%d")
+        self.week_earlier = (self.today - timedelta(days=7)).strftime("%Y-%m-%d")
+        self.month_earlier = (self.today - timedelta(days=30)).strftime("%Y-%m-%d")
+
+        if text == "1-day":
+            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.current_date, self.current_date)
+        elif text == "1-week":
+            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.week_earlier, self.current_date)
+        elif text == "1-month":
+            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.month_earlier, self.current_date)
+        else:
+            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+        self.populate_sales_scroll_view(self.transactions)
+    
+    def on_SalesScreen_refresh_BTN(self):
+        self.refresh_this = self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text
+        self.on_salesScreen_spinner_select(self.refresh_this)
+
+    
+    def populate_sales_scroll_view(self, transactions):
+        if transactions == None:
+            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+            #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
+        else:
+            self.transactions = transactions
+        self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+        self.price_list = self.backend.get_pricelist(self.loggedIn_user)
+
+        # Clear the scroll view
+        self.scroll_view = self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"]
+        self.scroll_view.clear_widgets()
+
+        for transaction in self.sell_transactions:
+            self.temp_itemType = transaction["item_type"]
+            row_layout = GridLayout(cols=4, size_hint_y=None, height=self.font_scaling * 30)
+            row_layout.bind(minimum_height=row_layout.setter('height'))
+            # row_layout.canvas.before.add(Color(0, 1, 0, 1)) # green color
+            # row_layout.canvas.before.add(Rectangle(pos=row_layout.pos, size=row_layout.size))
+
+            time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp']), font_size=self.font_scaling*10)
+            rice_type_label = Label(text=self.temp_itemType.capitalize(), font_size=self.font_scaling*12)
+
+            weight_type_label = Label(text=str(transaction['amount']), font_size=self.font_scaling*12)
+            total_type_label = Label(text=str(transaction['amount'] * self.price_list[self.temp_itemType]), font_size=self.font_scaling*12)
+
+            row_layout.add_widget(time_label)
+            row_layout.add_widget(rice_type_label)
+            row_layout.add_widget(weight_type_label)
+            row_layout.add_widget(total_type_label)
+
+            self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
+
 
     def prevent_keypress(self, *args):
         keycode = args[1] if len(args) > 1 else None
@@ -213,6 +283,7 @@ class MainApp(App):
             self.root.ids['login_screen'].ids['login_password'].text = ""
             self.root.ids['login_screen'].ids['login_message'].text = ""
 
+            self.loggedIn_user = self.try_login_username
             self.root.current = "main_screen"
             return True
         else:

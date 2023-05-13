@@ -25,6 +25,7 @@
 #:include kv/signup_screen.kv
 #:include kv/main_screen.kv
 #:include kv/status_screen.kv
+#:include kv/sales_screen.kv
 
 #====================================================#
 
@@ -47,6 +48,9 @@
 #               THIS SCREEN CAN ONLY BE ACCESSED AFTER LOGGING IN.
 ScreenManager:
 	id: screen_manager
+	SalesScreen:
+		name: "sales_screen"
+		id: sales_screen
 	StartUpScreen:
 		name: "startup_screen"
 		id: startup_screen

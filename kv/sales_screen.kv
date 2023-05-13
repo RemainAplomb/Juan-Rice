@@ -1,0 +1,161 @@
+#===========================================================================================================#
+
+# DEVELOPER:
+#        DIBANSA, RAHMANI 
+#   BRIEF DESCRIPTION OF THE PROGRAM:
+#        This program demonstrates a login and signup system using Firebase for authentication. 
+#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
+#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
+#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
+#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+
+#===========================================================================================================#
+
+#========== SALES SCREEN ==========#
+#:set color_button (0.33, 0.16, 0.13, 1)  # brown
+#:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
+<SalesOption@SpinnerOption>:
+    font_size: app.font_scaling * 15
+    font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+    background_color: color_button if self.state == 'down' else color_button_pressed
+    size_hint: None, None
+    size: app.font_scaling * 85 , app.font_scaling * 22
+
+
+<SalesScreen>:
+    FloatLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: "resources/backgrounds/login_background.png"
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: app.font_scaling * 15
+            padding: (app.font_scaling *20), self.height * 0.25, (app.font_scaling *20), (app.font_scaling *10)
+            # Left, Top, Right, Bottom
+            size_hint: 0.82, 0.46
+            pos_hint: {"center_x": 0.5, "center_y": 0.485}
+            canvas.after:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.x*1.35, self.center_y *1.31
+                    size: self.width*0.9, app.font_scaling *2
+            
+            canvas:
+                Color:
+                    rgba: 0.33, 0.16, 0.13, 0.9
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20, 20, 0, 0]
+        
+        ScrollView:
+			effect_cls: ScrollEffect
+            size_hint: 0.82, 0.34
+            pos_hint: {"center_x": 0.5, "center_y": 0.425}
+			GridLayout:
+                id: SalesScreen_salesScrollView
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                #padding: app.font_scaling * 2
+                #spacing: app.font_scaling * 2
+        
+        Label:
+            text: "SALES"
+            font_size: app.font_scaling * 34
+            font_name: "resources/fonts/impact/impact.ttf"
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": 0.32, "y" : 0.643}
+            color: (1, 1, 1, 1)
+        
+        Label:
+            id: SalesScreen_timeLabel
+            text: "Time"
+            font_size: app.font_scaling * 18
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": 0.02, "y" : 0.58}
+            color: (1, 1, 1, 1)
+        
+        Label:
+            id: SalesScreen_riceTypeLabel
+            text: "Rice"
+            font_size: app.font_scaling * 18
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": 0.22, "y" : 0.58}
+            color: (1, 1, 1, 1)
+        
+        Label:
+            id: SalesScreen_weightTypeLabel
+            text: "Weight"
+            font_size: app.font_scaling * 18
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.45, 0.08
+            pos_hint: {"x": 0.38, "y" : 0.58}
+            color: (1, 1, 1, 1)
+        
+        Label:
+            id: SalesScreen_totalTypeLabel
+            text: "Total"
+            font_size: app.font_scaling * 18
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.35, 0.08
+            pos_hint: {"x": 0.62, "y" : 0.58}
+            color: (1, 1, 1, 1)
+        
+        Spinner:
+            id: SalesScreen_timeSpinner
+            option_cls: "SalesOption"
+            option_height: app.font_scaling * 30
+            text: "Latest"
+            font_size: app.font_scaling * 15
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            values: ["Latest", "1-day", "1-week", "1-month"]
+            #size_hint: 0.175, 0.04
+            size_hint: None, None
+            size: app.font_scaling * 85 , app.font_scaling * 22
+            pos_hint: {"x": 0.12, "y": 0.65}
+            color: (1, 1, 1, 1)
+            on_text: 
+                app.on_salesScreen_spinner_select(self.text)
+            
+        
+        Button:
+            id: SalesScreen_refresh_BTN
+            text: "Refresh"
+            font_size: app.font_scaling * 15
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.2, 0.035
+            pos_hint: {"x": 0.66, "y": 0.65}
+            color: (1, 1, 1, 1)
+            on_release:
+                app.on_SalesScreen_refresh_BTN()
+        
+        ImageButton:
+            id: SalesScreen_goRefillScreen_BTN
+            source: "resources/buttons/refill.png"
+            size_hint: 0.5, 0.08
+            pos_hint: {"x": 0.265, "y": 0.14}
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                app.populate_sales_scroll_view("test_acc")
+                app.root.current = "refill_screen"
+                root.manager.transition.direction = "right"
+        
+        ImageButton:
+            id: SalesScreen_goBack_BTN
+            source: "resources/buttons/goBack.png"
+            size_hint: 0.5, 0.08
+            pos_hint: {"x": 0.265, "y": 0.05}
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                app.root.current = "main_screen"
+                root.manager.transition.direction = "right"
+        
