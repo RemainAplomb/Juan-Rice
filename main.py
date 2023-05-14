@@ -60,6 +60,18 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 
 
+from kivymd.app import MDApp
+# Chart
+import matplotlib
+matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
+# from kivymd.uix.chart import PieChart
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas, NavigationToolbar2Kivy, FigureCanvasKivyAgg
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+
+
+
+
 
 
 
@@ -125,6 +137,9 @@ class StatusScreen( Screen ):
 class SalesScreen( Screen ):
     pass
 
+class SalesStatsScreen( Screen ):
+    pass
+
 class VerticalBar(Widget):
     value = NumericProperty(0)
     value_normalized = NumericProperty(0)
@@ -162,7 +177,7 @@ class RootLayout(RelativeLayout):
    build: THE METHOD THAT BUILDS THE KIVY DEPENDENT PROGRAM.
 
 """
-class MainApp(App):
+class MainApp(MDApp):
     # APP VARIABLES
     username = "" 
     password = ""
@@ -185,6 +200,18 @@ class MainApp(App):
     
     def initialize_resources(self):
         self.loggedIn_user = "test_acc"
+
+        # TRANSACTION RELATED
+        self.transactions = None
+        self.sell_transactions = None
+        self.refill_transactions = None
+
+        # INITIALIZE
+        self.salesScreen_initialized = False
+        self.salesStatsScreen_initialized = False
+        self.statusScreen_initialized = False
+
+        self.figure = plt.figure()
         pass
 
     def on_resize(self, *args):
@@ -206,13 +233,19 @@ class MainApp(App):
         self.root.current = "status_screen"
     
     def on_enter_salesScreen(self):
-        if self.loggedIn_user == "":
-            self.loggedIn_user = "test_acc"
-        self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
-        self.populate_sales_scroll_view(self.transactions)
+        if self.salesScreen_initialized == False:
+            self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
+            if self.loggedIn_user == "":
+                self.loggedIn_user = "test_acc"
+            if self.transactions == None:
+                self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+                self.populate_sales_scroll_view(self.transactions)
+            else:
+                self.on_SalesScreen_refresh_BTN()
+            self.salesScreen_initialized = True
         self.root.current = "sales_screen"
     
-    def on_salesScreen_spinner_select(self, text):
+    def get_spinner_transactions(self, text):
         self.today = self.backend.get_current_date()
         self.current_date = self.today.strftime("%Y-%m-%d")
         self.week_earlier = (self.today - timedelta(days=7)).strftime("%Y-%m-%d")
@@ -226,6 +259,10 @@ class MainApp(App):
             self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.month_earlier, self.current_date)
         else:
             self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+        return self.transactions
+    
+    def on_salesScreen_spinner_select(self, text):
+        self.transactions = self.get_spinner_transactions(text)
         self.populate_sales_scroll_view(self.transactions)
     
     def on_SalesScreen_refresh_BTN(self):
@@ -265,7 +302,60 @@ class MainApp(App):
             row_layout.add_widget(total_type_label)
 
             self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
+    
+    def on_enter_salesStatsScreen(self):
+        if self.salesStatsScreen_initialized == False:
+            self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text = "Latest"
+            if self.loggedIn_user == "":
+                self.loggedIn_user = "test_acc"
+            if self.transactions == None:
+                self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+                self.populate_salesStats_scroll_view(self.transactions)
+            else:
+                self.on_SalesStatsScreen_refresh_BTN()
+            self.salesStatsScreen_initialized = True
+        self.root.current = "sales_stats_screen"
+    
+    def on_salesStatsScreen_spinner_select(self, text):
+        self.transactions = self.get_spinner_transactions(text)
+        self.populate_salesStats_scroll_view(self.transactions)
+    
+    def on_SalesStatsScreen_refresh_BTN(self):
+        self.refresh_this = self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text
+        self.on_salesStatsScreen_spinner_select(self.refresh_this)
+    
+    def populate_salesStats_scroll_view(self, transactions=None):
+        # Get the data for the pie chart from your backend
+        if transactions == None:
+            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+        if self.sell_transactions == None and self.refill_transactions == None:
+            self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+        data = self.backend.get_sales_by_product(self.sell_transactions)
 
+        self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].clear_widgets()
+        if self.transactions != []:
+            # Create a matplotlib figure and add a pie chart
+            fig, ax = plt.subplots()
+            labels = [label.capitalize() for label in data.keys()]
+            values = data.values()
+            wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
+            for text in texts:
+                text.set_fontsize(self.font_scaling*12)
+            for autotext in autotexts:
+                autotext.set_fontsize(self.font_scaling*12)
+            ax.set_aspect('auto')
+            ax.set_title('Sales Pie Chart', fontsize=self.font_scaling*18)
+
+            # Calculate the size of the pie chart based on the screen size
+            width, height = self.root.size
+            dpi = fig.get_dpi()
+            fig.set_size_inches(width/dpi, height/dpi)
+
+            # Convert the matplotlib figure to a Kivy widget
+            canvas = FigureCanvasKivyAgg(fig)
+
+            # Update the chart layout with the new chart
+            self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(canvas)
 
     def prevent_keypress(self, *args):
         keycode = args[1] if len(args) > 1 else None

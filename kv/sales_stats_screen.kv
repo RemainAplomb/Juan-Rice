@@ -11,7 +11,7 @@
 
 #===========================================================================================================#
 
-#========== SALES SCREEN ==========#
+#========== SALES STATS SCREEN ==========#
 #:set color_button (0.33, 0.16, 0.13, 1)  # brown
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
 <SalesOption@SpinnerOption>:
@@ -22,7 +22,7 @@
     size: app.font_scaling * 85 , app.font_scaling * 22
 
 
-<SalesScreen>:
+<SalesStatsScreen>:
     FloatLayout:
         canvas.before:
             Rectangle:
@@ -54,62 +54,28 @@
         
         ScrollView:
 			effect_cls: ScrollEffect
-            size_hint: 0.82, 0.34
+            size_hint: 0.82, 0.4
             pos_hint: {"center_x": 0.5, "center_y": 0.425}
 			GridLayout:
-                id: SalesScreen_salesScrollView
+                id: SalesStatsScreen_salesScrollView
                 cols: 1
                 size_hint_y: None
                 height: self.minimum_height
-                #padding: app.font_scaling * 2
-                #spacing: app.font_scaling * 2
+                row_default_height: root.height * 0.6
+				spacing: root.width * 0.01, root.height * 0.01
+                
         
         Label:
-            text: "SALES"
+            text: "STATS"
             font_size: app.font_scaling * 34
             font_name: "resources/fonts/impact/impact.ttf"
             size_hint: 0.35, 0.08
             pos_hint: {"x": 0.32, "y" : 0.643}
             color: (1, 1, 1, 1)
         
-        Label:
-            id: SalesScreen_timeLabel
-            text: "Time"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.02, "y" : 0.58}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_riceTypeLabel
-            text: "Rice"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.22, "y" : 0.58}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_weightTypeLabel
-            text: "Weight"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.45, 0.08
-            pos_hint: {"x": 0.38, "y" : 0.58}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_totalTypeLabel
-            text: "Total"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.62, "y" : 0.58}
-            color: (1, 1, 1, 1)
         
         Spinner:
-            id: SalesScreen_timeSpinner
+            id: SalesStatsScreen_timeSpinner
             option_cls: "SalesOption"
             option_height: app.font_scaling * 30
             text: "Latest"
@@ -122,11 +88,11 @@
             pos_hint: {"x": 0.12, "y": 0.65}
             color: (1, 1, 1, 1)
             on_text: 
-                app.on_salesScreen_spinner_select(self.text)
+                app.on_salesStatsScreen_spinner_select(self.text)
             
         
         Button:
-            id: SalesScreen_refresh_BTN
+            id: SalesStatsScreen_refresh_BTN
             text: "Refresh"
             font_size: app.font_scaling * 15
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
@@ -134,20 +100,20 @@
             pos_hint: {"x": 0.66, "y": 0.65}
             color: (1, 1, 1, 1)
             on_release:
-                app.on_SalesScreen_refresh_BTN()
+                app.on_SalesStatsScreen_refresh_BTN()
         
         ImageButton:
-            id: SalesScreen_salesStatsScreen_BTN
-            source: "resources/buttons/stats.png"
+            id: SalesStatsScreen_goSalesScreen_BTN
+            source: "resources/buttons/sales.png"
             size_hint: 0.5, 0.08
             pos_hint: {"x": 0.265, "y": 0.14}
             allow_stretch: True
             keep_ratio: False
             on_release:
-                app.on_enter_salesStatsScreen()
+                app.on_enter_salesScreen()
         
         ImageButton:
-            id: SalesScreen_goBack_BTN
+            id: SalesStatsScreen_goBack_BTN
             source: "resources/buttons/goBack.png"
             size_hint: 0.5, 0.08
             pos_hint: {"x": 0.265, "y": 0.05}

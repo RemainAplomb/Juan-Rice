@@ -316,14 +316,29 @@ class Backend_Functionalities:
         for self.transaction_id_date, self.transaction_id_data in self.transactions.items():
             for self.transaction_id, self.transaction_data in self.transaction_id_data.items():
                 self.transaction_data['transaction_id'] = self.transaction_id
-                print(" Transaction ID: ", self.transaction_id)
-                print(" Transaction data: ", self.transaction_data)
+                # print(" Transaction ID: ", self.transaction_id)
+                # print(" Transaction data: ", self.transaction_data)
                 self.transactions_list.append(self.transaction_data)
 
         # Reverse the transactions_list so that they are in chronological order
         self.transactions_list.reverse()
 
         return self.transactions_list
+    
+    def get_sales_by_product(self, transactions):
+        self.transactions = transactions
+        sales_by_product = {}
+
+        for transaction in self.transactions:
+            item_type = transaction['item_type']
+            amount = transaction['amount']
+            if item_type in sales_by_product:
+                sales_by_product[item_type] += amount
+            else:
+                sales_by_product[item_type] = amount
+
+        return sales_by_product
+
     
     def process_transactions(self, transactions):
         self.transactions = transactions
