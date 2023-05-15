@@ -215,7 +215,10 @@ class MainApp(MDApp):
         pass
 
     def on_resize(self, *args):
-        self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
+        try:
+            self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
+        except ValueError:
+            self.font_scaling = 1
         #print(f"font_scaling: {self.font_scaling*24}")
     
     def on_enter_statusScreen(self, storage_type="rice"):
@@ -290,7 +293,7 @@ class MainApp(MDApp):
             # row_layout.canvas.before.add(Color(0, 1, 0, 1)) # green color
             # row_layout.canvas.before.add(Rectangle(pos=row_layout.pos, size=row_layout.size))
 
-            time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp']), font_size=self.font_scaling*10)
+            time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp'], "%m-%d %H:%M"), font_size=self.font_scaling*10)
             rice_type_label = Label(text=self.temp_itemType.capitalize(), font_size=self.font_scaling*12)
 
             weight_type_label = Label(text=str(transaction['amount']), font_size=self.font_scaling*12)
@@ -328,16 +331,23 @@ class MainApp(MDApp):
         # Get the data for the pie chart from your backend
         if transactions == None:
             self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
-        if self.sell_transactions == None and self.refill_transactions == None:
-            self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
-        data = self.backend.get_sales_by_product(self.sell_transactions)
+        else:
+            self.transactions = transactions
+        self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+        self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
+
+        print(" Sales by Product: ", self.sales_by_product)
+        print(" Sales by Date: ", self.sales_by_date)
+        print(" Total sales by Date: ", self.total_sales_by_date)
+        print(" Transactions: ", self.transactions)
 
         self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].clear_widgets()
         if self.transactions != []:
+            # PIE CHART
             # Create a matplotlib figure and add a pie chart
             fig, ax = plt.subplots()
-            labels = [label.capitalize() for label in data.keys()]
-            values = data.values()
+            labels = [label.capitalize() for label in self.sales_by_product.keys()]
+            values = self.sales_by_product.values()
             wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
             for text in texts:
                 text.set_fontsize(self.font_scaling*12)
@@ -350,6 +360,49 @@ class MainApp(MDApp):
             width, height = self.root.size
             dpi = fig.get_dpi()
             fig.set_size_inches(width/dpi, height/dpi)
+
+            # Convert the matplotlib figure to a Kivy widget
+            canvas = FigureCanvasKivyAgg(fig)
+
+            # Update the chart layout with the new chart
+            self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(canvas)
+            # plt.clf()  # clear the plot
+
+            # LINE CHART
+            sorted_dates = sorted(self.total_sales_by_date.keys())
+            dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
+            sales = [self.total_sales_by_date[date] for date in sorted_dates]
+            print(" Sorted Dates: ", sorted_dates)
+            print(" Dates: ", dates)
+            print(" Sales: ", sales)
+            # Create a matplotlib figure and add a line chart
+            fig, ax = plt.subplots()
+            line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
+            for label in ax.xaxis.get_ticklabels():
+                label.set_fontsize(self.font_scaling * 8)
+            for label in ax.yaxis.get_ticklabels():
+                label.set_fontsize(self.font_scaling * 8)
+
+            # Customize the chart
+            ax.set_title('Sales Trend', fontsize=self.font_scaling*18)
+            ax.set_xlabel('Date', fontsize=self.font_scaling*12)
+            ax.set_ylabel('Total Sales', fontsize=self.font_scaling*12)
+
+            # Calculate the size of the pie chart based on the screen size
+            width, height = self.root.size
+            dpi = fig.get_dpi()
+            print(" Root Size: ", self.root.size)
+            print(" Dpi: ", dpi)
+            print(" width/dpi: ", width/dpi)
+            print(" width/dpi: ", round((width/dpi) * 0.8, 1))
+            # print(" width/dpi * 8: ", width/dpi * 8)
+            print(" height/dpi: ", height/dpi)
+            print(" height/dpi: ", round((height/dpi) * 0.8, 1))
+            # print(" height/dpi * 8: ", height/dpi *8)
+            # fig.set_size_inches(width/(dpi*2), height/(dpi*2))
+            # fig.set_figwidth(8)
+            # fig.set_figheight(6)
+
 
             # Convert the matplotlib figure to a Kivy widget
             canvas = FigureCanvasKivyAgg(fig)

@@ -60,9 +60,9 @@ class Backend_Functionalities:
     def get_current_date(self):
         return date.today()
     
-    def convert_timestamp(self, timestamp):
+    def convert_timestamp(self, timestamp, timestamp_format = "%m-%d %H:%M"):
         dt_object = datetime.datetime.fromtimestamp(int(timestamp))
-        return dt_object.strftime("%m-%d %H:%M")
+        return dt_object.strftime(timestamp_format)
     
     def convert_to_hash(self, convert_this):
         return hashlib.sha256(convert_this.encode()).hexdigest()
@@ -325,19 +325,35 @@ class Backend_Functionalities:
 
         return self.transactions_list
     
-    def get_sales_by_product(self, transactions):
+    def get_sales(self, transactions):
         self.transactions = transactions
         sales_by_product = {}
+        total_sales_by_date = {}
+        sales_by_date = {}
 
         for transaction in self.transactions:
             item_type = transaction['item_type']
             amount = transaction['amount']
+            date = self.convert_timestamp(transaction['timestamp'], "%y-%m-%d")
             if item_type in sales_by_product:
                 sales_by_product[item_type] += amount
             else:
                 sales_by_product[item_type] = amount
+            if item_type in sales_by_date:
+                if date in sales_by_date[item_type]:
+                    sales_by_date[item_type][date] += amount
+                else:
+                    sales_by_date[item_type][date] = amount
+            else:
+                sales_by_date[item_type] = {date: amount}
 
-        return sales_by_product
+            if date in total_sales_by_date:
+                total_sales_by_date[date] += amount
+            else:
+                total_sales_by_date[date] = amount
+
+        return sales_by_product, sales_by_date, total_sales_by_date
+
 
     
     def process_transactions(self, transactions):
@@ -430,7 +446,12 @@ if __name__ == "__main__":
     # login_user = pos.firebase_login('test_acc', '12345678')
     # is_success(login_user)
 
-    # pos.add_transaction("test_acc", "Sell", "Rice-Premium", 1)
+    pos.add_transaction("test_acc", "sell", "rice-premium", 1)
+    pos.add_transaction("test_acc", "sell", "rice-premium", 2)
+    pos.add_transaction("test_acc", "sell", "rice-premium", 0.5)
+    pos.add_transaction("test_acc", "sell", "rice-standard", 1)
+    pos.add_transaction("test_acc", "sell", "rice-standard", 2)
+    pos.add_transaction("test_acc", "sell", "rice-standard", 3)
     # pos.add_transaction("test_acc", "Refill", "Rice-Premium", 20)
     # pos.add_transaction("test_acc", "Refill", "Rice-Premiumz", 20)
     # pos.add_transaction("test_acc", "Refill", "Cup", 20)
@@ -438,41 +459,41 @@ if __name__ == "__main__":
 
     # transactions = pos.get_transactions_in_range("test_acc", "2023-01-01", "2023-05-08")
     transactions = pos.get_transactions_in_range("test_acc", "2023-05-08", "2023-05-08")
-    if len(transactions) == 0:
-        print("--------------")
-        print(" No transactions")
-        print("--------------")
-    for transaction in transactions:
-        print("--------------")
-        print(" Transaction ID: ", transaction['transaction_id'])
-        print(" Item Type: ", transaction['item_type'])
-        print(" Amount: ", transaction['amount'])
-        print(" Transaction Type: ", transaction['transaction_type'])
-        print(" Timestamp: ", pos.convert_timestamp(transaction['timestamp']))
-        print("--------------")
+    # if len(transactions) == 0:
+    #     print("--------------")
+    #     print(" No transactions")
+    #     print("--------------")
+    # for transaction in transactions:
+    #     print("--------------")
+    #     print(" Transaction ID: ", transaction['transaction_id'])
+    #     print(" Item Type: ", transaction['item_type'])
+    #     print(" Amount: ", transaction['amount'])
+    #     print(" Transaction Type: ", transaction['transaction_type'])
+    #     print(" Timestamp: ", pos.convert_timestamp(transaction['timestamp']))
+    #     print("--------------")
     
-    sell_transactions, refill_transactions = pos.process_transactions(transactions)
-    print("\n--------------\n")
-    print(" Total Sell Transactions:")
-    for item_type, total_amount in sell_transactions.items():
-        print(f" {item_type}: {total_amount}")
-    print("\n--------------")
+    # sell_transactions, refill_transactions = pos.process_transactions(transactions)
+    # print("\n--------------\n")
+    # print(" Total Sell Transactions:")
+    # for item_type, total_amount in sell_transactions.items():
+    #     print(f" {item_type}: {total_amount}")
+    # print("\n--------------")
 
-    print("\n--------------\n")
-    print(" Total Refill Transactions:")
-    for item_type, total_amount in refill_transactions.items():
-        print(f" {item_type}: {total_amount}")
-    print("\n--------------")
+    # print("\n--------------\n")
+    # print(" Total Refill Transactions:")
+    # for item_type, total_amount in refill_transactions.items():
+    #     print(f" {item_type}: {total_amount}")
+    # print("\n--------------")
 
-    storage = pos.retrieve_storage("test_acc", "rice")
-    print("\n--------------\n")
-    print(" Total Storage:")
-    for key, value in storage.items():
-        print(f" {key}: {value}")
-    print("\n--------------")
+    # storage = pos.retrieve_storage("test_acc", "rice")
+    # print("\n--------------\n")
+    # print(" Total Storage:")
+    # for key, value in storage.items():
+    #     print(f" {key}: {value}")
+    # print("\n--------------")
 
-    price = pos.get_pricelist("test_acc")
-    print(price)
+    # price = pos.get_pricelist("test_acc")
+    # print(price)
 
 
     # Log in an existing user
