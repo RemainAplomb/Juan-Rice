@@ -30,8 +30,8 @@
             hint_text: "Username"
 			halign: "center"
 			font_size: app.font_scaling * 24
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": .34, "y" :.55}
+            size_hint : 0.5, 0.08
+            pos_hint: {"x": .265, "y" :.55}
             write_tab: False
             multiline: False
             on_text:
@@ -43,8 +43,8 @@
             hint_text: "Password"
 			halign: "center"
 			font_size: app.font_scaling * 24
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": .34, "y" :.43}
+            size_hint : 0.5, 0.08
+            pos_hint: {"x": .265, "y" :.43}
             write_tab: False
             multiline: False
             on_text:
@@ -56,8 +56,8 @@
 			#background_color: 0, 0, 0, 0
 			allow_stretch: True
 			keep_ratio: False
-			size_hint : 0.3, 0.05
-			pos_hint: { "x" : 0.36 , "y" : 0.28 }
+			size_hint : 0.5, 0.08
+			pos_hint : { "x" : 0.265 , "y" : 0.26 }
 			on_release:
 				app.try_signup( signup_username.text, signup_password.text )
 				#signup_username.text = ""
@@ -67,8 +67,8 @@
 			id: SU_goBack_BTN
 			source: "resources/buttons/goBack.png"
 			#background_color: 0, 0, 0, 0
-			size_hint : 0.3, 0.05
-			pos_hint: { "x" : 0.36 , "y" : 0.2 }
+			size_hint : 0.5, 0.08
+			pos_hint : { "x" : 0.265 , "y" : 0.16 }
 			allow_stretch: True
 			keep_ratio: False
 			on_release:

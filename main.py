@@ -368,7 +368,7 @@ class MainApp(MDApp):
             print(" Sorted Dates: ", sorted_dates)
             print(" Dates: ", dates)
             print(" Sales: ", sales)
-            line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
+            line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 6)
             for label in ax.yaxis.get_ticklabels():
@@ -385,7 +385,7 @@ class MainApp(MDApp):
                 sales = [sales_data[date] for date in sorted_dates]
 
                 fig, ax = plt.subplots()
-                line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
+                line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
                 for label in ax.xaxis.get_ticklabels():
                     label.set_fontsize(self.font_scaling * 6)
                 for label in ax.yaxis.get_ticklabels():
