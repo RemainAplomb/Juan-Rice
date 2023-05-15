@@ -75,6 +75,7 @@ import matplotlib.pyplot as plt
 
 
 
+
 #==========  IMPORTING NECESSARY PYTHON FILES  ==========#
 """
  THESE PYTHON FILES ARE IMPORTED FROM THE SAME FOLDER.
@@ -328,87 +329,142 @@ class MainApp(MDApp):
         self.on_salesStatsScreen_spinner_select(self.refresh_this)
     
     def populate_salesStats_scroll_view(self, transactions=None):
-        # Get the data for the pie chart from your backend
-        if transactions == None:
+        if transactions is None:
             self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
         else:
             self.transactions = transactions
+
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
 
-        print(" Sales by Product: ", self.sales_by_product)
-        print(" Sales by Date: ", self.sales_by_date)
-        print(" Total sales by Date: ", self.total_sales_by_date)
-        print(" Transactions: ", self.transactions)
+        print("Sales by Product: ", self.sales_by_product)
+        print("Sales by Date: ", self.sales_by_date)
+        print("Total sales by Date: ", self.total_sales_by_date)
+        print("Transactions: ", self.transactions)
 
-        self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].clear_widgets()
-        if self.transactions != []:
+        sales_scroll_view = self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"]
+        sales_scroll_view.clear_widgets()
+
+        if self.transactions:
             # PIE CHART
-            # Create a matplotlib figure and add a pie chart
             fig, ax = plt.subplots()
             labels = [label.capitalize() for label in self.sales_by_product.keys()]
             values = self.sales_by_product.values()
             wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
             for text in texts:
-                text.set_fontsize(self.font_scaling*12)
+                text.set_fontsize(self.font_scaling * 12)
             for autotext in autotexts:
-                autotext.set_fontsize(self.font_scaling*12)
+                autotext.set_fontsize(self.font_scaling * 12)
             ax.set_aspect('auto')
-            ax.set_title('Sales Pie Chart', fontsize=self.font_scaling*18)
-
-            # Calculate the size of the pie chart based on the screen size
-            width, height = self.root.size
-            dpi = fig.get_dpi()
-            fig.set_size_inches(width/dpi, height/dpi)
-
-            # Convert the matplotlib figure to a Kivy widget
+            ax.set_title('Sales Pie Chart', fontsize=self.font_scaling * 18)
             canvas = FigureCanvasKivyAgg(fig)
+            sales_scroll_view.add_widget(canvas)
 
-            # Update the chart layout with the new chart
-            self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(canvas)
-            # plt.clf()  # clear the plot
-
-            # LINE CHART
+            # LINE CHART - Total Sales by Date
             sorted_dates = sorted(self.total_sales_by_date.keys())
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             sales = [self.total_sales_by_date[date] for date in sorted_dates]
+            fig, ax = plt.subplots()
             print(" Sorted Dates: ", sorted_dates)
             print(" Dates: ", dates)
             print(" Sales: ", sales)
-            # Create a matplotlib figure and add a line chart
-            fig, ax = plt.subplots()
             line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
             for label in ax.xaxis.get_ticklabels():
-                label.set_fontsize(self.font_scaling * 8)
+                label.set_fontsize(self.font_scaling * 6)
             for label in ax.yaxis.get_ticklabels():
-                label.set_fontsize(self.font_scaling * 8)
-
-            # Customize the chart
-            ax.set_title('Sales Trend', fontsize=self.font_scaling*18)
-            ax.set_xlabel('Date', fontsize=self.font_scaling*12)
-            ax.set_ylabel('Total Sales', fontsize=self.font_scaling*12)
-
-            # Calculate the size of the pie chart based on the screen size
-            width, height = self.root.size
-            dpi = fig.get_dpi()
-            print(" Root Size: ", self.root.size)
-            print(" Dpi: ", dpi)
-            print(" width/dpi: ", width/dpi)
-            print(" width/dpi: ", round((width/dpi) * 0.8, 1))
-            # print(" width/dpi * 8: ", width/dpi * 8)
-            print(" height/dpi: ", height/dpi)
-            print(" height/dpi: ", round((height/dpi) * 0.8, 1))
-            # print(" height/dpi * 8: ", height/dpi *8)
-            # fig.set_size_inches(width/(dpi*2), height/(dpi*2))
-            # fig.set_figwidth(8)
-            # fig.set_figheight(6)
-
-
-            # Convert the matplotlib figure to a Kivy widget
+                label.set_fontsize(self.font_scaling * 6)
+            ax.set_title('Sales Trend', fontsize=self.font_scaling * 18)
+            ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
+            ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
             canvas = FigureCanvasKivyAgg(fig)
+            sales_scroll_view.add_widget(canvas)
 
-            # Update the chart layout with the new chart
-            self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(canvas)
+            # LINE CHART - Sales by Rice Type
+            for rice_type, sales_data in self.sales_by_date.items():
+                sorted_dates = sorted(sales_data.keys())
+                sales = [sales_data[date] for date in sorted_dates]
+
+                fig, ax = plt.subplots()
+                line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
+                for label in ax.xaxis.get_ticklabels():
+                    label.set_fontsize(self.font_scaling * 6)
+                for label in ax.yaxis.get_ticklabels():
+                    label.set_fontsize(self.font_scaling * 6)
+                ax.set_title(f'{rice_type.capitalize()} Sales Trend', fontsize=self.font_scaling * 18)
+                ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
+                ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
+
+                canvas = FigureCanvasKivyAgg(fig)
+                sales_scroll_view.add_widget(canvas)
+
+
+    # def populate_salesStats_scroll_view(self, transactions=None):
+    #     # Get the data for the pie chart from your backend
+    #     if transactions is None:
+    #         self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+    #     else:
+    #         self.transactions = transactions
+    #     self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+    #     self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
+
+    #     print("Sales by Product:", self.sales_by_product)
+    #     print("Sales by Date:", self.sales_by_date)
+    #     print("Total sales by Date:", self.total_sales_by_date)
+    #     print("Transactions:", self.transactions)
+
+    #     # Clear the existing widgets in the sales scroll view
+    #     self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].clear_widgets()
+
+    #     if self.transactions:
+    #         # Create a box layout to hold the charts
+    #         box_layout = BoxLayout(orientation='vertical')
+
+    #         # Create a pie chart using Matplotlib
+    #         fig, ax = plt.subplots()
+    #         labels = [label.capitalize() for label in self.sales_by_product.keys()]
+    #         values = list(self.sales_by_product.values())
+    #         wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
+    #         for text in texts:
+    #             text.set_fontsize(self.font_scaling*8)
+    #         for autotext in autotexts:
+    #             autotext.set_fontsize(self.font_scaling*8)
+    #         ax.set_aspect('auto')
+    #         ax.set_title('Sales Pie Chart', fontsize=self.font_scaling*14)
+
+    #         # Convert the Matplotlib figure to a Kivy widget
+    #         fig_widget = FigureCanvasKivyAgg(fig)
+
+    #         # Add the pie chart widget to the box layout
+    #         box_layout.add_widget(fig_widget)
+
+    #         # Create a line chart using Matplotlib
+    #         sorted_dates = sorted(self.total_sales_by_date.keys())
+    #         # dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
+    #         sales = [self.total_sales_by_date[date] for date in sorted_dates]
+
+    #         fig, ax = plt.subplots()
+    #         line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
+    #         for label in ax.xaxis.get_ticklabels():
+    #             label.set_fontsize(self.font_scaling * 6)
+    #         for label in ax.yaxis.get_ticklabels():
+    #             label.set_fontsize(self.font_scaling * 6)
+
+    #         # Customize the chart
+    #         ax.set_title('Sales Trend', fontsize=self.font_scaling*14)
+    #         ax.set_xlabel('Date', fontsize=self.font_scaling*8)
+    #         ax.set_ylabel('Total Sales', fontsize=self.font_scaling*8)
+
+    #         # Convert the Matplotlib figure to a Kivy widget
+    #         fig_widget = FigureCanvasKivyAgg(fig)
+
+    #         # Add the line chart widget to the box layout
+    #         box_layout.add_widget(fig_widget)
+
+    #         # Add the box layout to the sales scroll view
+    #         self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(box_layout)
+
+
+
 
     def prevent_keypress(self, *args):
         keycode = args[1] if len(args) > 1 else None
