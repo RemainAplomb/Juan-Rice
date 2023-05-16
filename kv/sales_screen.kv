@@ -35,14 +35,14 @@
             spacing: app.font_scaling * 15
             padding: (app.font_scaling *20), self.height * 0.25, (app.font_scaling *20), (app.font_scaling *10)
             # Left, Top, Right, Bottom
-            size_hint: 0.82, 0.46
+            size_hint: 0.9, 0.56
             pos_hint: {"center_x": 0.5, "center_y": 0.485}
             canvas.after:
                 Color:
                     rgba: 1, 1, 1, 1
                 Rectangle:
-                    pos: self.x*1.35, self.center_y *1.31
-                    size: self.width*0.9, app.font_scaling *2
+                    pos: self.x*1.35, self.center_y *1.375
+                    size: self.width*0.95, app.font_scaling *2
             
             canvas:
                 Color:
@@ -54,8 +54,8 @@
         
         ScrollView:
 			effect_cls: ScrollEffect
-            size_hint: 0.82, 0.34
-            pos_hint: {"center_x": 0.5, "center_y": 0.425}
+            size_hint: 0.89, 0.43
+            pos_hint: {"center_x": 0.5, "center_y": 0.42}
 			GridLayout:
                 id: SalesScreen_salesScrollView
                 cols: 1
@@ -69,7 +69,7 @@
             font_size: app.font_scaling * 34
             font_name: "resources/fonts/impact/impact.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.32, "y" : 0.643}
+            pos_hint: {"x": 0.32, "y" : 0.675}
             color: (1, 1, 1, 1)
         
         Label:
@@ -78,7 +78,7 @@
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.02, "y" : 0.58}
+            pos_hint: {"x": 0.000005, "y" : 0.605}
             color: (1, 1, 1, 1)
         
         Label:
@@ -87,7 +87,7 @@
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.22, "y" : 0.58}
+            pos_hint: {"x": 0.195, "y" : 0.605}
             color: (1, 1, 1, 1)
         
         Label:
@@ -96,7 +96,7 @@
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.45, 0.08
-            pos_hint: {"x": 0.38, "y" : 0.58}
+            pos_hint: {"x": 0.31, "y" : 0.605}
             color: (1, 1, 1, 1)
         
         Label:
@@ -105,7 +105,7 @@
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.62, "y" : 0.58}
+            pos_hint: {"x": 0.51, "y" : 0.605}
             color: (1, 1, 1, 1)
         
         Spinner:
@@ -119,7 +119,7 @@
             #size_hint: 0.175, 0.04
             size_hint: None, None
             size: app.font_scaling * 85 , app.font_scaling * 22
-            pos_hint: {"x": 0.12, "y": 0.65}
+            pos_hint: {"x": 0.075, "y": 0.695}
             color: (1, 1, 1, 1)
             on_text: 
                 app.on_salesScreen_spinner_select(self.text)
@@ -131,7 +131,7 @@
             font_size: app.font_scaling * 15
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.2, 0.035
-            pos_hint: {"x": 0.66, "y": 0.65}
+            pos_hint: {"x": 0.71, "y": 0.695}
             color: (1, 1, 1, 1)
             on_release:
                 app.on_SalesScreen_refresh_BTN()
@@ -140,7 +140,7 @@
             id: SalesScreen_salesStatsScreen_BTN
             source: "resources/buttons/stats.png"
             size_hint: 0.5, 0.08
-            pos_hint: {"x": 0.265, "y": 0.14}
+            pos_hint: {"x": 0.265, "y": 0.11}
             allow_stretch: True
             keep_ratio: False
             on_release:
@@ -150,7 +150,7 @@
             id: SalesScreen_goBack_BTN
             source: "resources/buttons/goBack.png"
             size_hint: 0.5, 0.08
-            pos_hint: {"x": 0.265, "y": 0.05}
+            pos_hint: {"x": 0.265, "y": 0.02}
             allow_stretch: True
             keep_ratio: False
             on_release:

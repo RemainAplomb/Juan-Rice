@@ -401,6 +401,17 @@ class Backend_Functionalities:
 
         # print(self.sell_transactions)
         return self.sell_transactions, self.refill_transactions
+    
+    def remove_transaction(self, username, date, transaction_id):
+        try:
+            # Remove the transaction with the provided transaction_id
+            db.reference('users').child(username).child('transactions').child(date).child(transaction_id).delete()
+            return True  # Transaction successfully removed
+
+        except Exception as e:
+            # Handle any errors that occur during the database operation
+            print("Error removing transaction:", e)
+            return False  # Failed to remove transaction
         
     
     

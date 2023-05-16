@@ -38,6 +38,7 @@ from kivy.graphics import Color, RoundedRectangle
 import kivy.utils
 from kivy.utils import platform
 from kivy.uix.image import Image
+from kivy.uix.button import Button
 from kivy.clock import Clock
 from functools import partial
 from kivy.uix.button import ButtonBehavior
@@ -200,7 +201,10 @@ class MainApp(MDApp):
         return Builder.load_file("main.kv") # BUILD THE KIVY APP
     
     def initialize_resources(self):
-        self.loggedIn_user = "test_acc"
+        self.loggedInUser = "test_acc"
+
+        # Get the current working directory
+        self.current_directory = os.getcwd()
 
         # TRANSACTION RELATED
         self.transactions = None
@@ -224,7 +228,7 @@ class MainApp(MDApp):
     
     def on_enter_statusScreen(self, storage_type="rice"):
         self.max_storage = 20
-        self.rice_storage = self.backend.retrieve_storage(self.loggedIn_user, storage_type)
+        self.rice_storage = self.backend.retrieve_storage(self.loggedInUser, storage_type)
 
         if self.rice_storage:
             for key, value in self.rice_storage.items():
@@ -239,10 +243,10 @@ class MainApp(MDApp):
     def on_enter_salesScreen(self):
         if self.salesScreen_initialized == False:
             self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
-            if self.loggedIn_user == "":
-                self.loggedIn_user = "test_acc"
+            if self.loggedInUser == "":
+                self.loggedInUser = "test_acc"
             if self.transactions == None:
-                self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+                self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_sales_scroll_view(self.transactions)
             else:
                 self.on_SalesScreen_refresh_BTN()
@@ -256,13 +260,13 @@ class MainApp(MDApp):
         self.month_earlier = (self.today - timedelta(days=30)).strftime("%Y-%m-%d")
 
         if text == "1-day":
-            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.current_date, self.current_date)
+            self.transactions = self.backend.get_transactions_in_range(self.loggedInUser, self.current_date, self.current_date)
         elif text == "1-week":
-            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.week_earlier, self.current_date)
+            self.transactions = self.backend.get_transactions_in_range(self.loggedInUser, self.week_earlier, self.current_date)
         elif text == "1-month":
-            self.transactions = self.backend.get_transactions_in_range(self.loggedIn_user, self.month_earlier, self.current_date)
+            self.transactions = self.backend.get_transactions_in_range(self.loggedInUser, self.month_earlier, self.current_date)
         else:
-            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+            self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         return self.transactions
     
     def on_salesScreen_spinner_select(self, text):
@@ -276,12 +280,12 @@ class MainApp(MDApp):
     
     def populate_sales_scroll_view(self, transactions):
         if transactions == None:
-            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+            self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
             #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
         else:
             self.transactions = transactions
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
-        self.price_list = self.backend.get_pricelist(self.loggedIn_user)
+        self.price_list = self.backend.get_pricelist(self.loggedInUser)
 
         # Clear the scroll view
         self.scroll_view = self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"]
@@ -289,31 +293,58 @@ class MainApp(MDApp):
 
         for transaction in self.sell_transactions:
             self.temp_itemType = transaction["item_type"]
-            row_layout = GridLayout(cols=4, size_hint_y=None, height=self.font_scaling * 30)
+            row_layout = GridLayout(cols=5, size_hint_y=None, height=self.font_scaling * 30)
             row_layout.bind(minimum_height=row_layout.setter('height'))
-            # row_layout.canvas.before.add(Color(0, 1, 0, 1)) # green color
-            # row_layout.canvas.before.add(Rectangle(pos=row_layout.pos, size=row_layout.size))
 
             time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp'], "%m-%d %H:%M"), font_size=self.font_scaling*10)
             rice_type_label = Label(text=self.temp_itemType.capitalize(), font_size=self.font_scaling*12)
-
             weight_type_label = Label(text=str(transaction['amount']), font_size=self.font_scaling*12)
             total_type_label = Label(text=str(transaction['amount'] * self.price_list[self.temp_itemType]), font_size=self.font_scaling*12)
+
+            remove_button = Button(text="Remove", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
+            #remove_button.bind(on_release=self.remove_transaction)  # Add a method reference to handle the button click event
+            # remove_button.bind(on_release=partial(self.remove_transaction, self.backend.convert_timestamp(transaction['timestamp'], "%y-%m-%d"), transaction_id=transaction["transaction_id"]))
+            remove_button.bind(
+                on_release=partial(
+                    self.remove_transaction,
+                    date=self.backend.convert_timestamp(transaction['timestamp'], "%Y-%m-%d"),
+                    transaction_id=transaction["transaction_id"]
+                )
+            )         
 
             row_layout.add_widget(time_label)
             row_layout.add_widget(rice_type_label)
             row_layout.add_widget(weight_type_label)
             row_layout.add_widget(total_type_label)
+            row_layout.add_widget(remove_button)  # Add the remove button to the row
+
+            # Set the size_hint property of each widget to control column widths
+            time_label.size_hint_x = 0.25  # 20% of the row width
+            rice_type_label.size_hint_x = 0.2  # 30% of the row width
+            weight_type_label.size_hint_x = 0.175  # 20% of the row width
+            total_type_label.size_hint_x = 0.175  # 20% of the row width
+            remove_button.size_hint_x = 0.2  # 10% of the row width
 
             self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
+    
+    def remove_transaction(self, button, date, transaction_id):
+        remove_status = self.backend.remove_transaction(self.loggedInUser, date, transaction_id)
+        print(" Date: ", date)
+        print(" Transaction ID: " , transaction_id)
+        print(" Remove Status: ", remove_status)
+        # Get the row layout containing the button
+        row_layout = button.parent
+
+        # Remove the row layout from the scroll view
+        self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].remove_widget(row_layout)
     
     def on_enter_salesStatsScreen(self):
         if self.salesStatsScreen_initialized == False:
             self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text = "Latest"
-            if self.loggedIn_user == "":
-                self.loggedIn_user = "test_acc"
+            if self.loggedInUser == "":
+                self.loggedInUser = "test_acc"
             if self.transactions == None:
-                self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+                self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_salesStats_scroll_view(self.transactions)
             else:
                 self.on_SalesStatsScreen_refresh_BTN()
@@ -330,7 +361,7 @@ class MainApp(MDApp):
     
     def populate_salesStats_scroll_view(self, transactions=None):
         if transactions is None:
-            self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
+            self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         else:
             self.transactions = transactions
 
@@ -347,7 +378,7 @@ class MainApp(MDApp):
 
         if self.transactions:
             # PIE CHART
-            fig, ax = plt.subplots()
+            self.fig_pie_chart, ax = plt.subplots()
             labels = [label.capitalize() for label in self.sales_by_product.keys()]
             values = self.sales_by_product.values()
             wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
@@ -357,14 +388,14 @@ class MainApp(MDApp):
                 autotext.set_fontsize(self.font_scaling * 8)
             ax.set_aspect('auto')
             ax.set_title('Sales Pie Chart', fontsize=self.font_scaling * 16)
-            canvas = FigureCanvasKivyAgg(fig)
+            canvas = FigureCanvasKivyAgg(self.fig_pie_chart)
             sales_scroll_view.add_widget(canvas)
 
             # BAR CHART - Sales by Rice Type
-            fig, ax = plt.subplots()
+            self.fig_bar_chart, ax = plt.subplots()
             rice_types = list(self.sales_by_product.keys())
             sales_values = list(self.sales_by_product.values())
-            ax.bar(rice_types, sales_values)
+            ax.bar([rice_type.capitalize() for rice_type in rice_types], sales_values)
 
             # Customize the chart
             ax.set_title('Sales by Rice Type', fontsize=self.font_scaling * 16)
@@ -372,15 +403,13 @@ class MainApp(MDApp):
             ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
 
             # Set font size for x-axis and y-axis labels
-            ax.tick_params(axis='x', labelsize=self.font_scaling * 6)
-            ax.tick_params(axis='y', labelsize=self.font_scaling * 6)
+            ax.tick_params(axis='x', labelsize=self.font_scaling * 7)
+            ax.tick_params(axis='y', labelsize=self.font_scaling * 7)
 
-            # Rotate the x-axis labels for better readability if needed
-            # plt.xticks(rotation=45)
-
+            # Move the y-axis label to the right side
+            ax.yaxis.set_label_position('right')
             # Convert the matplotlib figure to a Kivy widget
-            canvas = FigureCanvasKivyAgg(fig)
-
+            canvas = FigureCanvasKivyAgg(self.fig_bar_chart)
             # Update the chart layout with the new chart
             sales_scroll_view.add_widget(canvas)
 
@@ -388,22 +417,24 @@ class MainApp(MDApp):
             sorted_dates = sorted(self.total_sales_by_date.keys())
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             sales = [self.total_sales_by_date[date] for date in sorted_dates]
-            fig, ax = plt.subplots()
+            self.fig_line_chart_total_sales, ax = plt.subplots()
             print(" Sorted Dates: ", sorted_dates)
             print(" Dates: ", dates)
             print(" Sales: ", sales)
             line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
-                label.set_fontsize(self.font_scaling * 6)
+                label.set_fontsize(self.font_scaling * 7)
             for label in ax.yaxis.get_ticklabels():
-                label.set_fontsize(self.font_scaling * 6)
+                label.set_fontsize(self.font_scaling * 7)
             ax.set_title('Sales Trend', fontsize=self.font_scaling * 16)
             ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
             ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
-            canvas = FigureCanvasKivyAgg(fig)
+            ax.yaxis.set_label_position('right')
+            canvas = FigureCanvasKivyAgg(self.fig_line_chart_total_sales)
             sales_scroll_view.add_widget(canvas)
 
             # LINE CHART - Sales by Rice Type
+            self.fig_line_charts_rice_type = {}
             for rice_type, sales_data in self.sales_by_date.items():
                 sorted_dates = sorted(sales_data.keys())
                 sales = [sales_data[date] for date in sorted_dates]
@@ -411,83 +442,57 @@ class MainApp(MDApp):
                 fig, ax = plt.subplots()
                 line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
                 for label in ax.xaxis.get_ticklabels():
-                    label.set_fontsize(self.font_scaling * 6)
+                    label.set_fontsize(self.font_scaling * 7)
                 for label in ax.yaxis.get_ticklabels():
-                    label.set_fontsize(self.font_scaling * 6)
+                    label.set_fontsize(self.font_scaling * 7)
                 ax.set_title(f'{rice_type.capitalize()} Sales Trend', fontsize=self.font_scaling * 16)
                 ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
                 ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
-
+                ax.yaxis.set_label_position('right')
+                
+                self.fig_line_charts_rice_type[rice_type] = fig
                 canvas = FigureCanvasKivyAgg(fig)
                 sales_scroll_view.add_widget(canvas)
+    
+
+    def on_SalesStatsScreen_export_BTN(self):
+        # Determine the platform
+        if os.name == 'posix':  # POSIX systems (Linux, macOS)
+            self.save_directory = os.path.join(self.current_directory, "save_directory")
+        else:  # Windows
+            self.save_directory = os.path.join(self.current_directory, "save_directory")
+
+        # Create the save directory if it doesn't exist
+        if not os.path.exists(self.save_directory):
+            os.makedirs(self.save_directory)
+
+        # Save the graphs one by one
+        if self.transactions:
+            # Save the pie chart
+            pie_chart_path = os.path.join(self.save_directory, "sales_pie_chart.png")
+            self.save_figure(self.fig_pie_chart, pie_chart_path)
+
+            # Save the bar chart
+            bar_chart_path = os.path.join(self.save_directory, "sales_bar_chart.png")
+            self.save_figure(self.fig_bar_chart, bar_chart_path)
+
+            # Save the line chart for total sales by date
+            line_chart_total_sales_path = os.path.join(self.save_directory, "line_chart_total_sales.png")
+            self.save_figure(self.fig_line_chart_total_sales, line_chart_total_sales_path)
+
+            # Save the line charts for sales by rice type
+            for rice_type, fig_line_chart_rice_type in self.fig_line_charts_rice_type.items():
+                line_chart_rice_type_path = os.path.join(self.save_directory, f"line_chart_{rice_type}_sales.png")
+                self.save_figure(fig_line_chart_rice_type, line_chart_rice_type_path)
+
+            # Show a message indicating the graphs have been saved
+            print("Graphs saved successfully!")
 
 
-    # def populate_salesStats_scroll_view(self, transactions=None):
-    #     # Get the data for the pie chart from your backend
-    #     if transactions is None:
-    #         self.transactions = self.backend.get_latest_transactions(self.loggedIn_user)
-    #     else:
-    #         self.transactions = transactions
-    #     self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
-    #     self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
-
-    #     print("Sales by Product:", self.sales_by_product)
-    #     print("Sales by Date:", self.sales_by_date)
-    #     print("Total sales by Date:", self.total_sales_by_date)
-    #     print("Transactions:", self.transactions)
-
-    #     # Clear the existing widgets in the sales scroll view
-    #     self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].clear_widgets()
-
-    #     if self.transactions:
-    #         # Create a box layout to hold the charts
-    #         box_layout = BoxLayout(orientation='vertical')
-
-    #         # Create a pie chart using Matplotlib
-    #         fig, ax = plt.subplots()
-    #         labels = [label.capitalize() for label in self.sales_by_product.keys()]
-    #         values = list(self.sales_by_product.values())
-    #         wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
-    #         for text in texts:
-    #             text.set_fontsize(self.font_scaling*8)
-    #         for autotext in autotexts:
-    #             autotext.set_fontsize(self.font_scaling*8)
-    #         ax.set_aspect('auto')
-    #         ax.set_title('Sales Pie Chart', fontsize=self.font_scaling*14)
-
-    #         # Convert the Matplotlib figure to a Kivy widget
-    #         fig_widget = FigureCanvasKivyAgg(fig)
-
-    #         # Add the pie chart widget to the box layout
-    #         box_layout.add_widget(fig_widget)
-
-    #         # Create a line chart using Matplotlib
-    #         sorted_dates = sorted(self.total_sales_by_date.keys())
-    #         # dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
-    #         sales = [self.total_sales_by_date[date] for date in sorted_dates]
-
-    #         fig, ax = plt.subplots()
-    #         line = ax.plot_date(sorted_dates, sales, linestyle='-', marker='')
-    #         for label in ax.xaxis.get_ticklabels():
-    #             label.set_fontsize(self.font_scaling * 6)
-    #         for label in ax.yaxis.get_ticklabels():
-    #             label.set_fontsize(self.font_scaling * 6)
-
-    #         # Customize the chart
-    #         ax.set_title('Sales Trend', fontsize=self.font_scaling*14)
-    #         ax.set_xlabel('Date', fontsize=self.font_scaling*8)
-    #         ax.set_ylabel('Total Sales', fontsize=self.font_scaling*8)
-
-    #         # Convert the Matplotlib figure to a Kivy widget
-    #         fig_widget = FigureCanvasKivyAgg(fig)
-
-    #         # Add the line chart widget to the box layout
-    #         box_layout.add_widget(fig_widget)
-
-    #         # Add the box layout to the sales scroll view
-    #         self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"].add_widget(box_layout)
-
-
+    def save_figure(self, fig, save_path):
+        # Save the figure to the specified path
+        fig.savefig(save_path)
+        plt.close(fig)
 
 
     def prevent_keypress(self, *args):
@@ -506,7 +511,7 @@ class MainApp(MDApp):
             self.root.ids['login_screen'].ids['login_password'].text = ""
             self.root.ids['login_screen'].ids['login_message'].text = ""
 
-            self.loggedIn_user = self.try_login_username
+            self.loggedInUser = self.try_login_username
             self.root.current = "main_screen"
             return True
         else:
