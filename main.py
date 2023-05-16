@@ -352,12 +352,36 @@ class MainApp(MDApp):
             values = self.sales_by_product.values()
             wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
             for text in texts:
-                text.set_fontsize(self.font_scaling * 12)
+                text.set_fontsize(self.font_scaling * 8)
             for autotext in autotexts:
-                autotext.set_fontsize(self.font_scaling * 12)
+                autotext.set_fontsize(self.font_scaling * 8)
             ax.set_aspect('auto')
-            ax.set_title('Sales Pie Chart', fontsize=self.font_scaling * 18)
+            ax.set_title('Sales Pie Chart', fontsize=self.font_scaling * 16)
             canvas = FigureCanvasKivyAgg(fig)
+            sales_scroll_view.add_widget(canvas)
+
+            # BAR CHART - Sales by Rice Type
+            fig, ax = plt.subplots()
+            rice_types = list(self.sales_by_product.keys())
+            sales_values = list(self.sales_by_product.values())
+            ax.bar(rice_types, sales_values)
+
+            # Customize the chart
+            ax.set_title('Sales by Rice Type', fontsize=self.font_scaling * 16)
+            ax.set_xlabel('Rice Type', fontsize=self.font_scaling * 8)
+            ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
+
+            # Set font size for x-axis and y-axis labels
+            ax.tick_params(axis='x', labelsize=self.font_scaling * 6)
+            ax.tick_params(axis='y', labelsize=self.font_scaling * 6)
+
+            # Rotate the x-axis labels for better readability if needed
+            # plt.xticks(rotation=45)
+
+            # Convert the matplotlib figure to a Kivy widget
+            canvas = FigureCanvasKivyAgg(fig)
+
+            # Update the chart layout with the new chart
             sales_scroll_view.add_widget(canvas)
 
             # LINE CHART - Total Sales by Date
@@ -373,7 +397,7 @@ class MainApp(MDApp):
                 label.set_fontsize(self.font_scaling * 6)
             for label in ax.yaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 6)
-            ax.set_title('Sales Trend', fontsize=self.font_scaling * 18)
+            ax.set_title('Sales Trend', fontsize=self.font_scaling * 16)
             ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
             ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
             canvas = FigureCanvasKivyAgg(fig)
@@ -390,7 +414,7 @@ class MainApp(MDApp):
                     label.set_fontsize(self.font_scaling * 6)
                 for label in ax.yaxis.get_ticklabels():
                     label.set_fontsize(self.font_scaling * 6)
-                ax.set_title(f'{rice_type.capitalize()} Sales Trend', fontsize=self.font_scaling * 18)
+                ax.set_title(f'{rice_type.capitalize()} Sales Trend', fontsize=self.font_scaling * 16)
                 ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
                 ax.set_ylabel('Total Sales', fontsize=self.font_scaling * 8)
 
