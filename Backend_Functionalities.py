@@ -412,6 +412,8 @@ class Backend_Functionalities:
             # Handle any errors that occur during the database operation
             print("Error removing transaction:", e)
             return False  # Failed to remove transaction
+    
+    
         
     
     

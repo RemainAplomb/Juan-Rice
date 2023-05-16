@@ -31,48 +31,46 @@ import hashlib
 """
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTransition
-from kivy.uix.dropdown import DropDown
-from kivy.properties import BooleanProperty
-from kivy.graphics import Color, RoundedRectangle
-import kivy.utils
-from kivy.utils import platform
-from kivy.uix.image import Image
-from kivy.uix.button import Button
-from kivy.clock import Clock
-from functools import partial
-from kivy.uix.button import ButtonBehavior
+
 from kivy.core.window import Window, Keyboard
-from kivy.properties import NumericProperty
+from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTransition
+
 from kivy.uix.relativelayout import RelativeLayout
-
-from kivy.uix.screenmanager import Screen
-from kivy.graphics import Rectangle
-from kivy.utils import get_color_from_hex
-
-from kivy.uix.widget import Widget
-from kivy.graphics import Rectangle, Color
-
-from kivy.properties import ListProperty
-
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 
+from kivy.properties import ListProperty
+from kivy.properties import BooleanProperty
+from kivy.properties import NumericProperty
+
+import kivy.utils
+from kivy.utils import platform
+
+from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
+from kivy.uix.image import Image
+from kivy.graphics import Rectangle, Color, RoundedRectangle
+from kivy.utils import get_color_from_hex
+
+from kivy.uix.widget import Widget
+from kivy.uix.dropdown import DropDown
+from kivy.uix.button import Button
+from kivy.uix.button import ButtonBehavior
+
+from kivy.clock import Clock
+from functools import partial
 
 from kivymd.app import MDApp
+
 # Chart
 import matplotlib
 matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
+
 # from kivymd.uix.chart import PieChart
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas, NavigationToolbar2Kivy, FigureCanvasKivyAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-
-
-
-
 
 
 
@@ -326,17 +324,52 @@ class MainApp(MDApp):
             remove_button.size_hint_x = 0.2  # 10% of the row width
 
             self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
-    
-    def remove_transaction(self, button, date, transaction_id):
-        remove_status = self.backend.remove_transaction(self.loggedInUser, date, transaction_id)
-        print(" Date: ", date)
-        print(" Transaction ID: " , transaction_id)
-        print(" Remove Status: ", remove_status)
-        # Get the row layout containing the button
-        row_layout = button.parent
 
-        # Remove the row layout from the scroll view
-        self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].remove_widget(row_layout)
+    def remove_transaction(self, button, date, transaction_id):
+        row_layout = button.parent
+        self.confirmation_popup = Popup(
+            title='Confirmation',
+            title_size=self.font_scaling*15,
+            content=Label(text='Are you sure you want to delete this transaction?'),
+            size_hint=(None, None),
+            size=(self.font_scaling*175, self.font_scaling*200),
+            auto_dismiss=False
+        )
+        
+        # Create buttons for confirmation popup
+        # confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_remove_transaction(row_layout, date, transaction_id))
+        # cancel_button = Button(text='Cancel', on_release=self.confirmation_popup.dismiss)
+
+        # Create buttons for confirmation popup
+        confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_remove_transaction(row_layout, date, transaction_id),
+                                font_size=self.font_scaling * 14,
+                                # size_hint=(0.4, None),
+                                height=self.font_scaling * 40)
+        cancel_button = Button(text='Cancel', on_release=self.confirmation_popup.dismiss,
+                            font_size=self.font_scaling * 14,
+                            # size_hint=(0.4, None),
+                            height=self.font_scaling * 40)
+        
+        # Add buttons to the confirmation popup
+        self.confirmation_popup.content = BoxLayout(orientation='vertical')
+        self.confirmation_popup.content.add_widget(confirm_button)
+        self.confirmation_popup.content.add_widget(cancel_button)
+        
+        # Open the confirmation popup
+        self.confirmation_popup.open()
+
+    def confirm_remove_transaction(self, row_layout, date, transaction_id):
+        # Close the confirmation popup
+        self.confirmation_popup.dismiss()
+
+        remove_status = self.backend.remove_transaction(self.loggedInUser, date, transaction_id)
+        if remove_status:
+            # Get the reference to the scroll view
+            scroll_view = self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"]
+
+            # Remove the parent widget (row layout) from the scroll view
+            scroll_view.remove_widget(row_layout)
+
     
     def on_enter_salesStatsScreen(self):
         if self.salesStatsScreen_initialized == False:
