@@ -14,6 +14,8 @@
 import random
 import sys
 import os
+import csv
+import ast
 from datetime import datetime
 
 import hashlib
@@ -515,6 +517,18 @@ class MainApp(MDApp):
         # Create the save directory if it doesn't exist
         if not os.path.exists(self.save_directory):
             os.makedirs(self.save_directory)
+
+        # Save sales transaction CSV
+        sales_transactions_filename = "sales_transactions.csv"
+        sales_transactions_path = os.path.join(self.save_directory, sales_transactions_filename)
+
+        with open(sales_transactions_path, 'w', newline='') as csvfile:
+            fieldnames = self.sell_transactions[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for transaction in self.sell_transactions:
+                writer.writerow(dict(transaction))
 
         # Save the graphs one by one
         if self.transactions:
