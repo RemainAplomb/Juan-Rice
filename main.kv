@@ -24,7 +24,8 @@
 #:include kv/login_screen.kv		
 #:include kv/signup_screen.kv
 #:include kv/main_screen.kv
-#:include kv/status_screen.kv
+#:include kv/rice_status_screen.kv
+#:include kv/misc_status_screen.kv
 #:include kv/sales_screen.kv
 #:include kv/sales_stats_screen.kv
 
@@ -64,9 +65,12 @@ ScreenManager:
 	MainScreen:
 		name: "main_screen"
 		id: main_screen
-	StatusScreen:
-		name: "status_screen"
-		id: status_screen
+	RiceStatusScreen:
+		name: "rice_status_screen"
+		id: rice_status_screen
+	MiscStatusScreen:
+		name: "misc_status_screen"
+		id: misc_status_screen
 	SalesScreen:
 		name: "sales_screen"
 		id: sales_screen

@@ -21,7 +21,7 @@
             pos: self.pos
             size: self.size[0], self.size[1] * self.value_normalized
 
-<StatusScreen>:
+<RiceStatusScreen>:
     FloatLayout:
         canvas.before:
             Rectangle:
@@ -35,14 +35,14 @@
             spacing: app.font_scaling * 15
             padding: (app.font_scaling *20), self.height * 0.25, (app.font_scaling *20), (app.font_scaling *10)
             # Left, Top, Right, Bottom
-            size_hint: 0.82, 0.46
-            pos_hint: {"center_x": 0.5, "center_y": 0.515}
+            size_hint: 0.9, 0.56
+            pos_hint: {"center_x": 0.5, "center_y": 0.485}
             canvas.after:
                 Color:
                     rgba: 1, 1, 1, 1
                 Rectangle:
-                    pos: self.x*1.35, self.center_y *1.31
-                    size: self.width*0.9, app.font_scaling *2
+                    pos: self.x*1.35, self.center_y *1.375
+                    size: self.width*0.95, app.font_scaling *2
             
             canvas:
                 Color:
@@ -52,20 +52,21 @@
                     size: self.size
                     radius: [20, 20, 0, 0]
             VerticalBar:
-                id: StatusScreen_bar_premium
+                id: RiceStatusScreen_bar_premium
                 value: 100
                 color: (1, 1, 1, 1)
             VerticalBar:
-                id: StatusScreen_bar_standard
+                id: RiceStatusScreen_bar_standard
                 value: 70
                 color: (1, 1, 1, 1)
             VerticalBar:
-                id: StatusScreen_bar_cheap
+                id: RiceStatusScreen_bar_cheap
                 value: 30
                 color: (1, 1, 1, 1)
         
         Label:
-            text: "STATUS"
+            id: RiceStatusScreen_riceStorageLabel
+            text: "RICE STORAGE"
             font_size: app.font_scaling * 34
             font_name: "resources/fonts/impact/impact.ttf"
             size_hint: 0.35, 0.08
@@ -73,16 +74,16 @@
             color: (1, 1, 1, 1)
         
         Label:
-            id: StatusScreen_riceLabel_premium
+            id: RiceStatusScreen_riceLabel_premium
             #text: "Premium"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.07, "y" : 0.61}
+            pos_hint: {"x": 0.05, "y" : 0.61}
             color: (1, 1, 1, 1)
         
         Label:
-            id: StatusScreen_riceLabel_standard
+            id: RiceStatusScreen_riceLabel_standard
             #text: "Standard"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
@@ -91,19 +92,30 @@
             color: (1, 1, 1, 1)
         
         Label:
-            id: StatusScreen_riceLabel_cheap
+            id: RiceStatusScreen_riceLabel_cheap
             #text: "Cheap"
             font_size: app.font_scaling * 18
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.575, "y" : 0.61}
+            pos_hint: {"x": 0.60, "y" : 0.61}
             color: (1, 1, 1, 1)
 
+        
         ImageButton:
-            id: SS_goBack_BTN
+            id: RiceStatusScreen_misc_BTN
+            source: "resources/buttons/misc.png"
+            size_hint: 0.5, 0.08
+            pos_hint: {"x": 0.265, "y": 0.11}
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                app.on_enter_miscStatusScreen()
+
+        ImageButton:
+            id: RiceStatusScreen_goBack_BTN
             source: "resources/buttons/goBack.png"
             size_hint: 0.5, 0.08
-            pos_hint: {"x": 0.265, "y": 0.17}
+            pos_hint: {"x": 0.265, "y": 0.02}
             allow_stretch: True
             keep_ratio: False
             on_release:

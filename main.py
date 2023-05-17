@@ -131,7 +131,10 @@ class SignUpScreen( Screen ):
 class MainScreen( Screen ):
     pass
 
-class StatusScreen( Screen ):
+class RiceStatusScreen( Screen ):
+    pass
+
+class MiscStatusScreen( Screen ):
     pass
 
 class SalesScreen( Screen ):
@@ -212,7 +215,7 @@ class MainApp(MDApp):
         # INITIALIZE
         self.salesScreen_initialized = False
         self.salesStatsScreen_initialized = False
-        self.statusScreen_initialized = False
+        self.riceStatusScreen_initialized = False
 
         self.figure = plt.figure()
         pass
@@ -224,7 +227,7 @@ class MainApp(MDApp):
             self.font_scaling = 1
         #print(f"font_scaling: {self.font_scaling*24}")
     
-    def on_enter_statusScreen(self, storage_type="rice"):
+    def on_enter_riceStatusScreen(self, storage_type="rice"):
         self.max_storage = 20
         self.rice_storage = self.backend.retrieve_storage(self.loggedInUser, storage_type)
 
@@ -233,10 +236,24 @@ class MainApp(MDApp):
                 self.tempBar_value = (value / self.max_storage) * 100
                 if self.tempBar_value >= 100 :
                     self.tempBar_value = 100
-                self.root.ids['status_screen'].ids["StatusScreen_bar_" + key].value = self.tempBar_value
-                self.root.ids['status_screen'].ids["StatusScreen_riceLabel_" + key].text = key.capitalize()
+                self.root.ids['rice_status_screen'].ids["RiceStatusScreen_bar_" + key].value = self.tempBar_value
+                self.root.ids['rice_status_screen'].ids["RiceStatusScreen_riceLabel_" + key].text = key.capitalize()
         self.root.transition.direction = "left"
-        self.root.current = "status_screen"
+        self.root.current = "rice_status_screen"
+    
+    def on_enter_miscStatusScreen(self, storage_type="misc"):
+        self.max_storage = 200
+        self.misc_storage = self.backend.retrieve_storage(self.loggedInUser, storage_type)
+
+        if self.misc_storage:
+            for key, value in self.misc_storage.items():
+                self.tempBar_value = (value / self.max_storage) * 100
+                if self.tempBar_value >= 100 :
+                    self.tempBar_value = 100
+                self.root.ids['misc_status_screen'].ids["MiscStatusScreen_bar_" + key].value = self.tempBar_value
+                self.root.ids['misc_status_screen'].ids["MiscStatusScreen_miscLabel_" + key].text = key.capitalize()
+        self.root.transition.direction = "left"
+        self.root.current = "misc_status_screen"
     
     def on_enter_salesScreen(self):
         if self.salesScreen_initialized == False:
