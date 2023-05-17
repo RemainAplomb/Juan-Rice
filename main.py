@@ -47,6 +47,7 @@ from kivy.properties import NumericProperty
 
 import kivy.utils
 from kivy.utils import platform
+from kivy.factory import Factory
 
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -228,6 +229,15 @@ class MainApp(MDApp):
         except ValueError:
             self.font_scaling = 1
         #print(f"font_scaling: {self.font_scaling*24}")
+    
+    def show_popup(self, message):
+        popup = Popup(title=message,
+                      title_size=self.font_scaling*14,
+                      separator_height=0,
+                      title_align="center",
+                      size_hint=(None, None),
+                      size=(self.font_scaling*280, self.font_scaling*100))
+        popup.open()
     
     def on_enter_riceStatusScreen(self, storage_type="rice"):
         self.max_storage = 20
@@ -550,7 +560,8 @@ class MainApp(MDApp):
                 self.save_figure(fig_line_chart_rice_type, line_chart_rice_type_path)
 
             # Show a message indicating the graphs have been saved
-            print("Graphs saved successfully!")
+            # print("Graphs saved successfully!")
+            self.show_popup("Graphs saved successfully!")
 
 
     def save_figure(self, fig, save_path):
