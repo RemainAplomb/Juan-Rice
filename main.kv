@@ -29,6 +29,8 @@
 #:include kv/misc_status_screen.kv
 #:include kv/sales_screen.kv
 #:include kv/sales_stats_screen.kv
+#:include kv/refill_history_screen.kv
+
 
 #====================================================#
 
@@ -75,6 +77,9 @@ ScreenManager:
 	SalesScreen:
 		name: "sales_screen"
 		id: sales_screen
+	RefillHistoryScreen:
+		name: "refill_history_screen"
+		id: refill_history_screen
 
 #========== SCALE LABEL ==========#
 # THIS IS A CUSTOM WIDGET FUNCTIONALITY

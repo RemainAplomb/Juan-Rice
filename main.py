@@ -47,7 +47,6 @@ from kivy.properties import NumericProperty
 
 import kivy.utils
 from kivy.utils import platform
-from kivy.factory import Factory
 
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -146,6 +145,9 @@ class SalesScreen( Screen ):
 class SalesStatsScreen( Screen ):
     pass
 
+class RefillHistoryScreen( Screen ):
+    pass
+
 class VerticalBar(Widget):
     value = NumericProperty(0)
     value_normalized = NumericProperty(0)
@@ -220,6 +222,8 @@ class MainApp(MDApp):
         self.salesStatsScreen_initialized = False
         self.riceStatusScreen_initialized = False
 
+        self.refillHistoryScreen_initialized = False
+
         self.figure = plt.figure()
         pass
 
@@ -280,6 +284,19 @@ class MainApp(MDApp):
             self.salesScreen_initialized = True
         self.root.current = "sales_screen"
     
+    def on_enter_refillHistoryScreen(self):
+        if self.refillHistoryScreen_initialized == False:
+            self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text = "Latest"
+            if self.loggedInUser == "":
+                self.loggedInUser = "test_acc"
+            if self.transactions == None:
+                self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
+                self.populate_refill_history_scroll_view(self.transactions)
+            else:
+                self.on_RefillHistoryScreen_refresh_BTN()
+            self.refillHistoryScreen_initialized = True
+        self.root.current = "refill_history_screen"
+    
     def get_spinner_transactions(self, text):
         self.today = self.backend.get_current_date()
         self.current_date = self.today.strftime("%Y-%m-%d")
@@ -300,9 +317,17 @@ class MainApp(MDApp):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_sales_scroll_view(self.transactions)
     
+    def on_refillHistoryScreen_spinner_select(self, text):
+        self.transactions = self.get_spinner_transactions(text)
+        self.populate_refill_history_scroll_view(self.transactions)
+    
     def on_SalesScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text
         self.on_salesScreen_spinner_select(self.refresh_this)
+    
+    def on_RefillHistoryScreen_refresh_BTN(self):
+        self.refresh_this = self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text
+        self.on_refillHistoryScreen_spinner_select(self.refresh_this)
 
     
     def populate_sales_scroll_view(self, transactions):
@@ -329,13 +354,12 @@ class MainApp(MDApp):
             total_type_label = Label(text=str(transaction['amount'] * self.price_list[self.temp_itemType]), font_size=self.font_scaling*12)
 
             remove_button = Button(text="Remove", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
-            #remove_button.bind(on_release=self.remove_transaction)  # Add a method reference to handle the button click event
-            # remove_button.bind(on_release=partial(self.remove_transaction, self.backend.convert_timestamp(transaction['timestamp'], "%y-%m-%d"), transaction_id=transaction["transaction_id"]))
             remove_button.bind(
                 on_release=partial(
                     self.remove_transaction,
                     date=self.backend.convert_timestamp(transaction['timestamp'], "%Y-%m-%d"),
-                    transaction_id=transaction["transaction_id"]
+                    transaction_id=transaction["transaction_id"],
+                    transaction_type="sell"
                 )
             )         
 
@@ -353,8 +377,56 @@ class MainApp(MDApp):
             remove_button.size_hint_x = 0.2  # 10% of the row width
 
             self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
+    
+    def populate_refill_history_scroll_view(self, transactions):
+        if transactions == None:
+            self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
+            #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
+        else:
+            self.transactions = transactions
+        self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+        # self.price_list = self.backend.get_pricelist(self.loggedInUser)
 
-    def remove_transaction(self, button, date, transaction_id):
+        # Clear the scroll view
+        self.scroll_view = self.root.ids['refill_history_screen'].ids["RefillHistoryScreen_refillHistoryScrollView"]
+        self.scroll_view.clear_widgets()
+
+        for transaction in self.refill_transactions:
+            self.temp_itemType = transaction["item_type"]
+            row_layout = GridLayout(cols=4, size_hint_y=None, height=self.font_scaling * 30)
+            row_layout.bind(minimum_height=row_layout.setter('height'))
+
+            time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp'], "%m-%d %H:%M"), font_size=self.font_scaling*10)
+            item_type_label = Label(text=self.temp_itemType.capitalize(), font_size=self.font_scaling*12)
+            amount_type_label = Label(text=str(transaction['amount']), font_size=self.font_scaling*12)
+            # total_type_label = Label(text=str(transaction['amount'] * self.price_list[self.temp_itemType]), font_size=self.font_scaling*12)
+
+            remove_button = Button(text="Remove", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
+            remove_button.bind(
+                on_release=partial(
+                    self.remove_transaction,
+                    date=self.backend.convert_timestamp(transaction['timestamp'], "%Y-%m-%d"),
+                    transaction_id=transaction["transaction_id"],
+                    transaction_type="refill"
+                )
+            )         
+
+            row_layout.add_widget(time_label)
+            row_layout.add_widget(item_type_label)
+            row_layout.add_widget(amount_type_label)
+            # row_layout.add_widget(total_type_label)
+            row_layout.add_widget(remove_button)  # Add the remove button to the row
+
+            # Set the size_hint property of each widget to control column widths
+            time_label.size_hint_x = 0.3  # 20% of the row width
+            item_type_label.size_hint_x = 0.25  # 30% of the row width
+            amount_type_label.size_hint_x = 0.25  # 20% of the row width
+            # total_type_label.size_hint_x = 0.175  # 20% of the row width
+            remove_button.size_hint_x = 0.2  # 10% of the row width
+
+            self.root.ids['refill_history_screen'].ids["RefillHistoryScreen_refillHistoryScrollView"].add_widget(row_layout)
+
+    def remove_transaction(self, button, date, transaction_id, transaction_type="sell"):
         row_layout = button.parent
         self.confirmation_popup = Popup(
             title='Confirmation',
@@ -364,13 +436,9 @@ class MainApp(MDApp):
             size=(self.font_scaling*175, self.font_scaling*200),
             auto_dismiss=False
         )
-        
-        # Create buttons for confirmation popup
-        # confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_remove_transaction(row_layout, date, transaction_id))
-        # cancel_button = Button(text='Cancel', on_release=self.confirmation_popup.dismiss)
 
         # Create buttons for confirmation popup
-        confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_remove_transaction(row_layout, date, transaction_id),
+        confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_remove_transaction(row_layout, date, transaction_id, transaction_type),
                                 font_size=self.font_scaling * 14,
                                 # size_hint=(0.4, None),
                                 height=self.font_scaling * 40)
@@ -387,14 +455,17 @@ class MainApp(MDApp):
         # Open the confirmation popup
         self.confirmation_popup.open()
 
-    def confirm_remove_transaction(self, row_layout, date, transaction_id):
+    def confirm_remove_transaction(self, row_layout, date, transaction_id, transaction_type = "sell"):
         # Close the confirmation popup
         self.confirmation_popup.dismiss()
 
         remove_status = self.backend.remove_transaction(self.loggedInUser, date, transaction_id)
         if remove_status:
             # Get the reference to the scroll view
-            scroll_view = self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"]
+            if transaction_type == "sell":
+                scroll_view = self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"]
+            else:
+                scroll_view = self.root.ids['refill_history_screen'].ids["RefillHistoryScreen_refillHistoryScrollView"]
 
             # Remove the parent widget (row layout) from the scroll view
             scroll_view.remove_widget(row_layout)
