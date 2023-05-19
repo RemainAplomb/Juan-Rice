@@ -353,6 +353,36 @@ class Backend_Functionalities:
                 total_sales_by_date[date] = amount
 
         return sales_by_product, sales_by_date, total_sales_by_date
+    
+
+    def get_refill(self, transactions):
+        self.transactions = transactions
+        refill_by_product = {}
+        total_refill_by_date = {}
+        refill_by_date = {}
+
+        for transaction in self.transactions:
+            item_type = transaction['item_type']
+            amount = transaction['amount']
+            date = self.convert_timestamp(transaction['timestamp'], "%y-%m-%d")
+            if item_type in refill_by_product:
+                refill_by_product[item_type] += amount
+            else:
+                refill_by_product[item_type] = amount
+            if item_type in refill_by_date:
+                if date in refill_by_date[item_type]:
+                    refill_by_date[item_type][date] += amount
+                else:
+                    refill_by_date[item_type][date] = amount
+            else:
+                refill_by_date[item_type] = {date: amount}
+
+            if date in total_refill_by_date:
+                total_refill_by_date[date] += amount
+            else:
+                total_refill_by_date[date] = amount
+
+        return refill_by_product, refill_by_date, total_refill_by_date
 
 
     

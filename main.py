@@ -148,6 +148,9 @@ class SalesStatsScreen( Screen ):
 class RefillHistoryScreen( Screen ):
     pass
 
+class RefillStatsScreen( Screen ):
+    pass
+
 class VerticalBar(Widget):
     value = NumericProperty(0)
     value_normalized = NumericProperty(0)
@@ -223,6 +226,7 @@ class MainApp(MDApp):
         self.riceStatusScreen_initialized = False
 
         self.refillHistoryScreen_initialized = False
+        self.refillStatsScreen_initialized = False
 
         self.figure = plt.figure()
         pass
@@ -289,7 +293,7 @@ class MainApp(MDApp):
             self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
                 self.loggedInUser = "test_acc"
-            if self.transactions == None:
+            if self.transactions == None or self.refillHistoryScreen_initialized == False:
                 self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_refill_history_scroll_view(self.transactions)
             else:
@@ -484,13 +488,34 @@ class MainApp(MDApp):
             self.salesStatsScreen_initialized = True
         self.root.current = "sales_stats_screen"
     
+    def on_enter_refillStatsScreen(self):
+        if self.refillStatsScreen_initialized == False:
+            self.root.ids['refill_stats_screen'].ids['RefillStatsScreen_timeSpinner'].text = "Latest"
+            if self.loggedInUser == "":
+                self.loggedInUser = "test_acc"
+            if self.transactions == None:
+                self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
+                self.populate_refillStats_scroll_view(self.transactions)
+            else:
+                self.on_RefillStatsScreen_refresh_BTN()
+            self.refillStatsScreen_initialized = True
+        self.root.current = "refill_stats_screen"
+    
     def on_salesStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_salesStats_scroll_view(self.transactions)
     
+    def on_refillStatsScreen_spinner_select(self, text):
+        self.transactions = self.get_spinner_transactions(text)
+        self.populate_refillStats_scroll_view(self.transactions)
+    
     def on_SalesStatsScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text
         self.on_salesStatsScreen_spinner_select(self.refresh_this)
+    
+    def on_RefillStatsScreen_refresh_BTN(self):
+        self.refresh_this = self.root.ids['refill_stats_screen'].ids['RefillStatsScreen_timeSpinner'].text
+        self.on_refillStatsScreen_spinner_select(self.refresh_this)
     
     def populate_salesStats_scroll_view(self, transactions=None):
         if transactions is None:
@@ -587,6 +612,101 @@ class MainApp(MDApp):
                 canvas = FigureCanvasKivyAgg(fig)
                 sales_scroll_view.add_widget(canvas)
     
+    def populate_refillStats_scroll_view(self, transactions=None):
+        if transactions is None:
+            self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
+        else:
+            self.transactions = transactions
+
+        self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
+        self.refill_by_product, self.refill_by_date, self.total_refill_by_date = self.backend.get_refill(self.refill_transactions)
+
+        print("Refill by Product: ", self.refill_by_product)
+        print("Refill by Date: ", self.refill_by_date)
+        print("Total refill by Date: ", self.total_refill_by_date)
+        print("Transactions: ", self.transactions)
+
+        refill_scroll_view = self.root.ids['refill_stats_screen'].ids["RefillStatsScreen_refillScrollView"]
+        refill_scroll_view.clear_widgets()
+
+        if self.transactions:
+            # PIE CHART
+            self.fig_pie_chart, ax = plt.subplots()
+            labels = [label.capitalize() for label in self.refill_by_product.keys()]
+            values = self.refill_by_product.values()
+            wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%.2f%%')
+            for text in texts:
+                text.set_fontsize(self.font_scaling * 8)
+            for autotext in autotexts:
+                autotext.set_fontsize(self.font_scaling * 8)
+            ax.set_aspect('auto')
+            ax.set_title('Refill Pie Chart', fontsize=self.font_scaling * 16)
+            canvas = FigureCanvasKivyAgg(self.fig_pie_chart)
+            refill_scroll_view.add_widget(canvas)
+
+            # BAR CHART - Refill by Item Type
+            self.fig_bar_chart, ax = plt.subplots()
+            item_types = list(self.refill_by_product.keys())
+            refill_values = list(self.refill_by_product.values())
+            ax.bar([item_type.capitalize() for item_type in item_types], refill_values)
+
+            # Customize the chart
+            ax.set_title('Refill by Item Type', fontsize=self.font_scaling * 16)
+            ax.set_xlabel('Item Type', fontsize=self.font_scaling * 8)
+            ax.set_ylabel('Total Refill', fontsize=self.font_scaling * 8)
+
+            # Set font size for x-axis and y-axis labels
+            ax.tick_params(axis='x', labelsize=self.font_scaling * 7)
+            ax.tick_params(axis='y', labelsize=self.font_scaling * 7)
+
+            # Move the y-axis label to the right side
+            ax.yaxis.set_label_position('right')
+            # Convert the matplotlib figure to a Kivy widget
+            canvas = FigureCanvasKivyAgg(self.fig_bar_chart)
+            # Update the chart layout with the new chart
+            refill_scroll_view.add_widget(canvas)
+
+            # LINE CHART - Total Refill by Date
+            sorted_dates = sorted(self.total_refill_by_date.keys())
+            dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
+            refill = [self.total_refill_by_date[date] for date in sorted_dates]
+            self.fig_line_chart_total_refill, ax = plt.subplots()
+            print(" Sorted Dates: ", sorted_dates)
+            print(" Dates: ", dates)
+            print(" Refill: ", refill)
+            line = ax.plot_date(sorted_dates, refill, linestyle='-', fmt='o')
+            for label in ax.xaxis.get_ticklabels():
+                label.set_fontsize(self.font_scaling * 7)
+            for label in ax.yaxis.get_ticklabels():
+                label.set_fontsize(self.font_scaling * 7)
+            ax.set_title('Refill Trend', fontsize=self.font_scaling * 16)
+            ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
+            ax.set_ylabel('Total Refill', fontsize=self.font_scaling * 8)
+            ax.yaxis.set_label_position('right')
+            canvas = FigureCanvasKivyAgg(self.fig_line_chart_total_refill)
+            refill_scroll_view.add_widget(canvas)
+
+            # LINE CHART - Refill by Item Type
+            self.fig_line_charts_item_type = {}
+            for item_type, refill_data in self.refill_by_date.items():
+                sorted_dates = sorted(refill_data.keys())
+                refill = [refill_data[date] for date in sorted_dates]
+
+                fig, ax = plt.subplots()
+                line = ax.plot_date(sorted_dates, refill, linestyle='-', fmt='o')
+                for label in ax.xaxis.get_ticklabels():
+                    label.set_fontsize(self.font_scaling * 7)
+                for label in ax.yaxis.get_ticklabels():
+                    label.set_fontsize(self.font_scaling * 7)
+                ax.set_title(f'{item_type.capitalize()} Refill Trend', fontsize=self.font_scaling * 16)
+                ax.set_xlabel('Date', fontsize=self.font_scaling * 8)
+                ax.set_ylabel('Total Refill', fontsize=self.font_scaling * 8)
+                ax.yaxis.set_label_position('right')
+                
+                self.fig_line_charts_item_type[item_type] = fig
+                canvas = FigureCanvasKivyAgg(fig)
+                refill_scroll_view.add_widget(canvas)
+    
 
     def on_SalesStatsScreen_export_BTN(self):
         # Determine the platform
@@ -629,6 +749,52 @@ class MainApp(MDApp):
             for rice_type, fig_line_chart_rice_type in self.fig_line_charts_rice_type.items():
                 line_chart_rice_type_path = os.path.join(self.save_directory, f"line_chart_{rice_type}_sales.png")
                 self.save_figure(fig_line_chart_rice_type, line_chart_rice_type_path)
+
+            # Show a message indicating the graphs have been saved
+            # print("Graphs saved successfully!")
+            self.show_popup("Graphs saved successfully!")
+    
+    def on_RefillStatsScreen_export_BTN(self):
+        # Determine the platform
+        if os.name == 'posix':  # POSIX systems (Linux, macOS)
+            self.save_directory = os.path.join(self.current_directory, "save_directory")
+        else:  # Windows
+            self.save_directory = os.path.join(self.current_directory, "save_directory")
+
+        # Create the save directory if it doesn't exist
+        if not os.path.exists(self.save_directory):
+            os.makedirs(self.save_directory)
+
+        # Save refill transaction CSV
+        refill_transactions_filename = "refill_transactions.csv"
+        refill_transactions_path = os.path.join(self.save_directory, refill_transactions_filename)
+
+        with open(refill_transactions_path, 'w', newline='') as csvfile:
+            fieldnames = self.refill_transactions[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for transaction in self.refill_transactions:
+                writer.writerow(dict(transaction))
+
+        # Save the graphs one by one
+        if self.transactions:
+            # Save the pie chart
+            pie_chart_path = os.path.join(self.save_directory, "refill_pie_chart.png")
+            self.save_figure(self.fig_pie_chart, pie_chart_path)
+
+            # Save the bar chart
+            bar_chart_path = os.path.join(self.save_directory, "refill_bar_chart.png")
+            self.save_figure(self.fig_bar_chart, bar_chart_path)
+
+            # Save the line chart for total refill by date
+            line_chart_total_refill_path = os.path.join(self.save_directory, "line_chart_total_refill.png")
+            self.save_figure(self.fig_line_chart_total_refill, line_chart_total_refill_path)
+
+            # Save the line charts for refill by item type
+            for item_type, fig_line_chart_item_type in self.fig_line_charts_item_type.items():
+                line_chart_item_type_path = os.path.join(self.save_directory, f"line_chart_{item_type}_refill.png")
+                self.save_figure(fig_line_chart_item_type, line_chart_item_type_path)
 
             # Show a message indicating the graphs have been saved
             # print("Graphs saved successfully!")

@@ -11,10 +11,10 @@
 
 #===========================================================================================================#
 
-#========== REFILL HISTORY SCREEN ==========#
+#========== REFILL STATS SCREEN ==========#
 #:set color_button (0.33, 0.16, 0.13, 1)  # brown
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
-<RefillHistoryOption@SpinnerOption>:
+<RefillOption@SpinnerOption>:
     font_size: app.font_scaling * 15
     font_name: "resources/fonts/nunito/Nunito-Light.ttf"
     background_color: color_button if self.state == 'down' else color_button_pressed
@@ -22,7 +22,7 @@
     size: app.font_scaling * 85 , app.font_scaling * 22
 
 
-<RefillHistoryScreen>:
+<RefillStatsScreen>:
     FloatLayout:
         canvas.before:
             Rectangle:
@@ -54,81 +54,68 @@
         
         ScrollView:
 			effect_cls: ScrollEffect
-            size_hint: 0.89, 0.42
-            pos_hint: {"center_x": 0.5, "center_y": 0.42}
+            size_hint: 0.89, 0.45
+            pos_hint: {"center_x": 0.5, "center_y": 0.435}
 			GridLayout:
-                id: RefillHistoryScreen_refillHistoryScrollView
+                id: RefillStatsScreen_refillScrollView
                 cols: 1
                 size_hint_y: None
                 height: self.minimum_height
-                #padding: app.font_scaling * 2
-                #spacing: app.font_scaling * 2
+                row_default_height: root.height * 0.6
+				spacing: root.width * 0.01, root.height * 0.01
+            
+                
         
         Label:
-            text: "RESTOCK"
+            text: "STATS"
             font_size: app.font_scaling * 34
             font_name: "resources/fonts/impact/impact.ttf"
             size_hint: 0.35, 0.08
             pos_hint: {"x": 0.32, "y" : 0.675}
             color: (1, 1, 1, 1)
         
-        Label:
-            id: RefillHistoryScreen_timeLabel
-            text: "Time"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.015, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: Refill HistoryScreen_riceTypeLabel
-            text: "Item"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.26, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: RefillHistoryScreen_amountTypeLabel
-            text: "Amount"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.45, 0.08
-            pos_hint: {"x": 0.425, "y" : 0.605}
-            color: (1, 1, 1, 1)
         
         Spinner:
-            id: RefillHistoryScreen_timeSpinner
-            option_cls: "RefillHistoryOption"
+            id: RefillStatsScreen_timeSpinner
+            option_cls: "RefillOption"
             option_height: app.font_scaling * 30
             text: "Latest"
             font_size: app.font_scaling * 15
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            values: ["Latest", "1-day", "1-week", "1-month"]
+            values: ["Latest", "1-week", "1-month"]
             #size_hint: 0.175, 0.04
             size_hint: None, None
             size: app.font_scaling * 85 , app.font_scaling * 22
             pos_hint: {"x": 0.075, "y": 0.695}
             color: (1, 1, 1, 1)
             on_text: 
-                app.on_refillHistoryScreen_spinner_select(self.text)
+                app.on_refillStatsScreen_spinner_select(self.text)
             
         
         Button:
-            id: RefillHistoryScreen_refresh_BTN
+            id: RefillStatsScreen_refresh_BTN
             text: "Refresh"
             font_size: app.font_scaling * 15
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             size_hint: 0.2, 0.035
-            pos_hint: {"x": 0.71, "y": 0.695}
+            pos_hint: {"x": 0.71, "y": 0.675}
             color: (1, 1, 1, 1)
             on_release:
-                app.on_RefillHistoryScreen_refresh_BTN()
+                app.on_RefillStatsScreen_refresh_BTN()
+        
+        Button:
+            id: RefillStatsScreen_export_BTN
+            text: "Export"
+            font_size: app.font_scaling * 15
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            size_hint: 0.2, 0.035
+            pos_hint: {"x": 0.71, "y": 0.715}
+            color: (1, 1, 1, 1)
+            on_release:
+                app.on_RefillStatsScreen_export_BTN()
         
         ImageButton:
-            id: RefillHistoryScreen_refillScreen_BTN
+            id: RefillStatsScreen_refillScreen_BTN
             source: "resources/buttons/refill.png"
             size_hint: 0.425, 0.07
             pos_hint: {"x": 0.05, "y": 0.11}
@@ -138,14 +125,14 @@
                 app.on_enter_salesStatsScreen()
         
         ImageButton:
-            id: RefillHistoryScreen_refillStatsScreen_BTN
-            source: "resources/buttons/stats.png"
+            id: RefillStatsScreen_refillStatsScreen_BTN
+            source: "resources/buttons/refill_history.png"
             size_hint: 0.425, 0.07
             pos_hint: {"x": 0.525, "y": 0.11}
             allow_stretch: True
             keep_ratio: False
             on_release:
-                app.on_enter_refillStatsScreen()
+                app.on_enter_refillHistoryScreen()
         
         ImageButton:
             id: RefillHistoryScreen_goBack_BTN
