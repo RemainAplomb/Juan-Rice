@@ -14,12 +14,8 @@
 #========== REFILL STATS SCREEN ==========#
 #:set color_button (0.33, 0.16, 0.13, 1)  # brown
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
-<RefillOption@SpinnerOption>:
-    font_size: app.font_scaling * 15
-    font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-    background_color: color_button if self.state == 'down' else color_button_pressed
-    size_hint: None, None
-    size: app.font_scaling * 85 , app.font_scaling * 22
+# Moved to main.kv <RefillOption@SpinnerOption>:
+
 
 
 <RefillStatsScreen>:
@@ -84,8 +80,9 @@
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
             values: ["Latest", "1-week", "1-month"]
             #size_hint: 0.175, 0.04
-            size_hint: None, None
-            size: app.font_scaling * 85 , app.font_scaling * 22
+            #size_hint: None, None
+            #size: app.font_scaling * 85 , app.font_scaling * 22
+            size_hint: 0.2, 0.035
             pos_hint: {"x": 0.075, "y": 0.695}
             color: (1, 1, 1, 1)
             on_text: 
@@ -122,7 +119,7 @@
             allow_stretch: True
             keep_ratio: False
             on_release:
-                app.on_enter_salesStatsScreen()
+                app.on_enter_refillScreen()
         
         ImageButton:
             id: RefillStatsScreen_refillStatsScreen_BTN

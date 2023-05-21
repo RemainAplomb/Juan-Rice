@@ -189,7 +189,7 @@ class Backend_Functionalities:
 
         self.valid_transaction_types = [ "refill", "sell"]
         self.valid_rice_types = [ "rice-premium", "rice-standard", "rice-cheap"]
-        self.valid_misc_types = [ "cups"]
+        self.valid_misc_types = [ "misc-cups", "misc-coin1", "misc-coin2"]
 
         try:
             self.amount= float(amount)
@@ -243,21 +243,34 @@ class Backend_Functionalities:
                 if self.item_type.startswith('rice'):
                     self.storage_ref = db.reference('users').child(self.username).child('storage').child('rice').child(self.item_type.split('-')[1])
                     self.storage_ref.set(self.storage_ref.get() - self.amount)
-                elif self.item_type == 'cups':
-                    self.storage_ref = db.reference('users').child(self.username).child('storage').child('Misc').child('cups')
+                elif self.item_type.startswith('misc'):
+                    self.storage_ref = db.reference('users').child(self.username).child('storage').child('misc').child(self.item_type.split('-')[1])
                     self.storage_ref.set(self.storage_ref.get() - self.amount)
             elif self.transaction_type == 'refill':
+                print(" Item Type: ", self.item_type, self.item_type.split('-')[1])
                 if self.item_type.startswith('rice'):
                     self.storage_ref = db.reference('users').child(self.username).child('storage').child('rice').child(self.item_type.split('-')[1])
-                    self.storage_ref.set(self.storage_ref.get() + self.amount)
-                elif self.item_type == 'cups':
-                    self.storage_ref = db.reference('users').child(self.username).child('storage').child('misc').child('cups')
-                    self.storage_ref.set(self.storage_ref.get() + self.amount)
+                    self.storage_update_amount = self.storage_ref.get() + self.amount
+                    if self.storage_update_amount >= 20:
+                        # Storage Limit Exceeded
+                        return False, "Storage Limit Exceeded"
+                    else:
+                        self.storage_ref.set(self.storage_update_amount)
+                elif self.item_type.startswith('misc'):
+                    self.storage_ref = db.reference('users').child(self.username).child('storage').child('misc').child(self.item_type.split('-')[1])
+                    self.storage_update_amount = self.storage_ref.get() + self.amount
+                    if self.storage_update_amount >= 200:
+                        return False, "Storage Limit Exceeded"
+                    else:
+                        self.storage_ref.set(self.storage_update_amount)
+
             # Print success message
             print('Transaction added successfully')
+            return True, "Successfully Added Transaction"
         except Exception as e:
             # Handle error here
             print('Error adding transaction: {}'.format(e))
+            return False, e
     
     def get_pricelist(self, username):
         self.username = str(username).lower()
@@ -428,6 +441,11 @@ class Backend_Functionalities:
                     self.sell_transactions.append(self.transaction)
                 elif self.transaction['transaction_type'] == 'refill':
                     self.refill_transactions.append(self.transaction)
+            if self.transaction["item_type"].startswith("misc"):
+                self.item_type = self.transaction["item_type"].replace("misc-", "")
+                self.transaction["item_type"] = self.item_type
+                if self.transaction['transaction_type'] == 'refill':
+                    self.refill_transactions.append(self.transaction)
 
         # print(self.sell_transactions)
         return self.sell_transactions, self.refill_transactions
@@ -489,16 +507,12 @@ if __name__ == "__main__":
     # login_user = pos.firebase_login('test_acc', '12345678')
     # is_success(login_user)
 
-    pos.add_transaction("test_acc", "sell", "rice-premium", 1)
-    pos.add_transaction("test_acc", "sell", "rice-premium", 2)
-    pos.add_transaction("test_acc", "sell", "rice-premium", 0.5)
-    pos.add_transaction("test_acc", "sell", "rice-standard", 1)
-    pos.add_transaction("test_acc", "sell", "rice-standard", 2)
-    pos.add_transaction("test_acc", "sell", "rice-standard", 3)
-    # pos.add_transaction("test_acc", "Refill", "Rice-Premium", 20)
-    # pos.add_transaction("test_acc", "Refill", "Rice-Premiumz", 20)
-    # pos.add_transaction("test_acc", "Refill", "Cup", 20)
-    # pos.add_transaction("test_acc", "Refill", "Cups", 20)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 1)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 2)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 0.5)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 1)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 2)
+    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 3)
 
     # transactions = pos.get_transactions_in_range("test_acc", "2023-01-01", "2023-05-08")
     transactions = pos.get_transactions_in_range("test_acc", "2023-05-08", "2023-05-08")

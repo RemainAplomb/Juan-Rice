@@ -29,6 +29,7 @@
 #:include kv/misc_status_screen.kv
 #:include kv/sales_screen.kv
 #:include kv/sales_stats_screen.kv
+#:include kv/refill_screen.kv
 #:include kv/refill_history_screen.kv
 #:include kv/refill_stats_screen.kv
 
@@ -54,9 +55,9 @@
 #               THIS SCREEN CAN ONLY BE ACCESSED AFTER LOGGING IN.
 ScreenManager:
 	id: screen_manager
-	SalesStatsScreen:
-		name: "sales_stats_screen"
-		id: sales_stats_screen
+	MainScreen:
+		name: "main_screen"
+		id: main_screen
 	StartUpScreen:
 		name: "startup_screen"
 		id: startup_screen
@@ -66,9 +67,6 @@ ScreenManager:
 	SignUpScreen:
 		name: "signup_screen"
 		id: signup_screen
-	MainScreen:
-		name: "main_screen"
-		id: main_screen
 	RiceStatusScreen:
 		name: "rice_status_screen"
 		id: rice_status_screen
@@ -78,6 +76,12 @@ ScreenManager:
 	SalesScreen:
 		name: "sales_screen"
 		id: sales_screen
+	SalesStatsScreen:
+		name: "sales_stats_screen"
+		id: sales_stats_screen
+	RefillScreen:
+		name: "refill_screen"
+		id: refill_screen
 	RefillHistoryScreen:
 		name: "refill_history_screen"
 		id: refill_history_screen
@@ -102,3 +106,25 @@ ScreenManager:
             y: self._scale or 1.
     canvas.after:
         PopMatrix
+
+<SalesOption@SpinnerOption>:
+    font_size: app.font_scaling * 15
+    font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+    background_color: color_button if self.state == 'down' else color_button_pressed
+    size_hint: 0.2, None
+    size_y: app.font_scaling * 15
+
+<RefillOption@SpinnerOption>:
+    font_size: app.font_scaling * 15
+    font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+    background_color: color_button if self.state == 'down' else color_button_pressed
+    size_hint: 0.2, None
+    size_y: app.font_scaling * 15
+
+<RefillOption2@SpinnerOption>:
+    font_size: app.font_scaling * 15
+    font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+    background_color: color_button if self.state == 'down' else color_button_pressed
+    size_hint: 0.4, None
+    size_y: app.font_scaling * 20
+    max_size_y: app.font_scaling * 20

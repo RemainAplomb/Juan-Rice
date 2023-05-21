@@ -11,13 +11,14 @@
 
 #===========================================================================================================#
 
-#========== SALES SCREEN ==========#
+#========== REFILL SCREEN ==========#
 #:set color_button (0.33, 0.16, 0.13, 1)  # brown
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
-# Moved to main.kv <SalesOption@SpinnerOption>:
+# Moved to main.kv <RefillOption2@SpinnerOption>:
 
 
-<SalesScreen>:
+
+<RefillScreen>:
     FloatLayout:
         canvas.before:
             Rectangle:
@@ -47,102 +48,95 @@
                     size: self.size
                     radius: [20, 20, 0, 0]
         
-        ScrollView:
-			effect_cls: ScrollEffect
-            size_hint: 0.89, 0.42
-            pos_hint: {"center_x": 0.5, "center_y": 0.42}
-			GridLayout:
-                id: SalesScreen_salesScrollView
-                cols: 1
-                size_hint_y: None
-                height: self.minimum_height
-                #padding: app.font_scaling * 2
-                #spacing: app.font_scaling * 2
-        
         Label:
-            text: "SALES"
+            text: "REFILL"
             font_size: app.font_scaling * 34
             font_name: "resources/fonts/impact/impact.ttf"
             size_hint: 0.35, 0.08
             pos_hint: {"x": 0.32, "y" : 0.675}
             color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_timeLabel
-            text: "Time"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.000005, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_riceTypeLabel
-            text: "Rice"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.195, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_weightTypeLabel
-            text: "Weight"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.45, 0.08
-            pos_hint: {"x": 0.31, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Label:
-            id: SalesScreen_totalTypeLabel
-            text: "Total"
-            font_size: app.font_scaling * 18
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.35, 0.08
-            pos_hint: {"x": 0.51, "y" : 0.605}
-            color: (1, 1, 1, 1)
-        
-        Spinner:
-            id: SalesScreen_timeSpinner
-            option_cls: "SalesOption"
-            option_height: app.font_scaling * 30
-            text: "Latest"
-            font_size: app.font_scaling * 15
-            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            values: ["Latest", "1-day", "1-week", "1-month"]
-            size_hint: 0.2, 0.035
-            #size_hint: None, None
-            #size: app.font_scaling * 85 , app.font_scaling * 22
-            pos_hint: {"x": 0.075, "y": 0.695}
-            color: (1, 1, 1, 1)
-            on_text: 
-                app.on_salesScreen_spinner_select(self.text)
-            
+
+        TextInput:
+            id: RefillScreen_amountInput
+            #password: True
+            hint_text: "Amount"
+            halign: "center"
+            font_size: app.font_scaling * 24
+            size_hint : 0.4, 0.07
+            pos_hint: {"x": .3, "y" :0.43}
+			write_tab: False
+            multiline: False
+            on_text:
+                self.focus = not self.focus if self.text.endswith("\n") else self.focus
+                #self.text = self.text.replace("\n","")
         
         Button:
-            id: SalesScreen_refresh_BTN
-            text: "Refresh"
+            id: RefillScreen_add_BTN
+            text: "Add"
             font_size: app.font_scaling * 15
             font_name: "resources/fonts/nunito/Nunito-Light.ttf"
-            size_hint: 0.2, 0.035
-            pos_hint: {"x": 0.71, "y": 0.695}
+            size_hint: 0.4, 0.07
+            pos_hint: {"x": 0.3, "y" :0.33}
             color: (1, 1, 1, 1)
             on_release:
-                app.on_SalesScreen_refresh_BTN()
+                app.on_RefillScreen_add_BTN()
+        
+        Spinner:
+            id: RefillScreen_storageTimeSpinner
+            option_cls: "RefillOption2"
+            option_height: app.font_scaling * 30
+            text: "Rice"
+            font_size: app.font_scaling * 15
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            values: ["Rice", "Misc"]
+            #size_hint: 0.175, 0.04
+            #size_hint: None, None
+            #size: app.font_scaling * 150 , app.font_scaling * 35
+            size_hint: 0.4, 0.06
+            pos_hint: {"x": 0.075, "y": 0.56}
+            color: (1, 1, 1, 1)
+            on_text: 
+                app.on_refillScreen_spinner_select(self.text, "storage")
+        
+        Spinner:
+            id: RefillScreen_itemTimeSpinner
+            option_cls: "RefillOption2"
+            option_height: app.font_scaling * 30
+            text: "Premium"
+            font_size: app.font_scaling * 15
+            font_name: "resources/fonts/nunito/Nunito-Light.ttf"
+            values: ["Premium", "Standard", "Cheap"]
+            #size_hint: 0.175, 0.04
+            size_hint: None, None
+            #size: app.font_scaling * 150 , app.font_scaling * 35
+            size_hint: 0.4, 0.06
+            pos_hint: {"x": 0.52, "y": 0.56}
+            color: (1, 1, 1, 1)
+            on_text: 
+                #app.on_refillScreen_spinner_select(self.text, "item")
         
         ImageButton:
-            id: SalesScreen_salesStatsScreen_BTN
-            source: "resources/buttons/stats.png"
-            size_hint: 0.5, 0.08
-            pos_hint: {"x": 0.265, "y": 0.11}
+            id: RefillScreen_refillHistoryScreen_BTN
+            source: "resources/buttons/refill_history.png"
+            size_hint: 0.425, 0.07
+            pos_hint: {"x": 0.05, "y": 0.11}
             allow_stretch: True
             keep_ratio: False
             on_release:
-                app.on_enter_salesStatsScreen()
+                app.on_enter_refillHistoryScreen()
         
         ImageButton:
-            id: SalesScreen_menu_BTN
+            id: RefillScreen_refillStatsScreen_BTN
+            source: "resources/buttons/stats.png"
+            size_hint: 0.425, 0.07
+            pos_hint: {"x": 0.525, "y": 0.11}
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                app.on_enter_refillStatsScreen()
+        
+        ImageButton:
+            id: RefillScreen_menu_BTN
             source: "resources/buttons/menu.png"
             size_hint: 0.5, 0.08
             pos_hint: {"x": 0.265, "y": 0.02}

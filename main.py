@@ -145,6 +145,9 @@ class SalesScreen( Screen ):
 class SalesStatsScreen( Screen ):
     pass
 
+class RefillScreen( Screen ):
+    pass
+
 class RefillHistoryScreen( Screen ):
     pass
 
@@ -225,6 +228,7 @@ class MainApp(MDApp):
         self.salesStatsScreen_initialized = False
         self.riceStatusScreen_initialized = False
 
+        self.refillScreen_initialized = False
         self.refillHistoryScreen_initialized = False
         self.refillStatsScreen_initialized = False
 
@@ -280,13 +284,26 @@ class MainApp(MDApp):
             self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
                 self.loggedInUser = "test_acc"
-            if self.transactions == None:
+            if self.transactions == None or self.salesScreen_initialized == False:
                 self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_sales_scroll_view(self.transactions)
             else:
                 self.on_SalesScreen_refresh_BTN()
             self.salesScreen_initialized = True
         self.root.current = "sales_screen"
+    
+    def on_enter_refillScreen(self):
+        # if self.salesScreen_initialized == False:
+        #     self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
+        #     if self.loggedInUser == "":
+        #         self.loggedInUser = "test_acc"
+        #     if self.transactions == None:
+        #         self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
+        #         self.populate_sales_scroll_view(self.transactions)
+        #     else:
+        #         self.on_SalesScreen_refresh_BTN()
+        #     self.salesScreen_initialized = True
+        self.root.current = "refill_screen"
     
     def on_enter_refillHistoryScreen(self):
         if self.refillHistoryScreen_initialized == False:
@@ -320,18 +337,49 @@ class MainApp(MDApp):
     def on_salesScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_sales_scroll_view(self.transactions)
+        self.show_popup("Sales History Refreshed")
+    
+    def on_refillScreen_spinner_select(self, text, spinner_type="storage"):
+        # self.transactions = self.get_spinner_transactions(text)
+        # self.populate_sales_scroll_view(self.transactions)
+        if text.lower() == "rice":
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text = "Premium"
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].values = ["Premium", "Standard", "Cheap"]
+        if text.lower() == "misc":
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text = "Cups"
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].values = ["Cups", "Coin1", "Coin2"]
     
     def on_refillHistoryScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_refill_history_scroll_view(self.transactions)
+        self.show_popup("Refill History Refreshed")
     
+    def on_RefillScreen_add_BTN(self):
+        self.storage_type = self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text
+        self.item_type = self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text
+        print(" Storage Type: ", self.storage_type)
+        print(" Item Type: ", self.item_type)
+        try:
+            self.refill_amount = float(self.root.ids['refill_screen'].ids['RefillScreen_amountInput'].text)
+            print(" Refill Amount: ", self.refill_amount)
+            self.refill_status, self.refill_message = self.backend.add_transaction(self.loggedInUser, "refill", f"{self.storage_type.lower()}-{self.item_type.lower()}", self.refill_amount)
+            print(" Refill Status: ", self.refill_status)
+            print(" Refill Message: ", self.refill_message)
+            self.show_popup(self.refill_message)
+        except:
+            print(" Invalid Amount Input")
+            self.show_popup("Invalid Amount Input")
+        
+
     def on_SalesScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text
         self.on_salesScreen_spinner_select(self.refresh_this)
+        # self.show_popup("Sales History Refreshed")
     
     def on_RefillHistoryScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text
         self.on_refillHistoryScreen_spinner_select(self.refresh_this)
+        # self.show_popup("Refill History Refreshed")
 
     
     def populate_sales_scroll_view(self, transactions):
@@ -480,7 +528,7 @@ class MainApp(MDApp):
             self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
                 self.loggedInUser = "test_acc"
-            if self.transactions == None:
+            if self.transactions == None or self.salesStatsScreen_initialized == False:
                 self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_salesStats_scroll_view(self.transactions)
             else:
@@ -493,7 +541,7 @@ class MainApp(MDApp):
             self.root.ids['refill_stats_screen'].ids['RefillStatsScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
                 self.loggedInUser = "test_acc"
-            if self.transactions == None:
+            if self.transactions == None or self.refillStatsScreen_initialized == False:
                 self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
                 self.populate_refillStats_scroll_view(self.transactions)
             else:
@@ -504,10 +552,12 @@ class MainApp(MDApp):
     def on_salesStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_salesStats_scroll_view(self.transactions)
+        self.show_popup("Sales Stats Refreshed")
     
     def on_refillStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
         self.populate_refillStats_scroll_view(self.transactions)
+        self.show_popup("Refill Stats Refreshed")
     
     def on_SalesStatsScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text
