@@ -32,6 +32,7 @@
 #:include kv/refill_screen.kv
 #:include kv/refill_history_screen.kv
 #:include kv/refill_stats_screen.kv
+#:include kv/notification_screen.kv
 
 
 #====================================================#
@@ -55,9 +56,6 @@
 #               THIS SCREEN CAN ONLY BE ACCESSED AFTER LOGGING IN.
 ScreenManager:
 	id: screen_manager
-	MainScreen:
-		name: "main_screen"
-		id: main_screen
 	StartUpScreen:
 		name: "startup_screen"
 		id: startup_screen
@@ -67,6 +65,9 @@ ScreenManager:
 	SignUpScreen:
 		name: "signup_screen"
 		id: signup_screen
+	MainScreen:
+		name: "main_screen"
+		id: main_screen
 	RiceStatusScreen:
 		name: "rice_status_screen"
 		id: rice_status_screen
@@ -88,6 +89,9 @@ ScreenManager:
 	RefillStatsScreen:
 		name: "refill_stats_screen"
 		id: refill_stats_screen
+	NotificationScreen:
+		name: "notification_screen"
+		id: notification_screen
 
 #========== SCALE LABEL ==========#
 # THIS IS A CUSTOM WIDGET FUNCTIONALITY

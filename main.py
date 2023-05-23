@@ -40,6 +40,7 @@ from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTran
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 
 from kivy.properties import ListProperty
 from kivy.properties import BooleanProperty
@@ -48,6 +49,7 @@ from kivy.properties import NumericProperty
 import kivy.utils
 from kivy.utils import platform
 
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
@@ -154,6 +156,20 @@ class RefillHistoryScreen( Screen ):
 class RefillStatsScreen( Screen ):
     pass
 
+class NotificationScreen( Screen ):
+    pass
+
+class NotificationCard(FloatLayout):
+    def __init__(self, button_text, image_source, **kwargs):
+        super(NotificationCard, self).__init__(**kwargs)
+        
+        background = Image(source=image_source, allow_stretch=True, keep_ratio=False)
+        self.add_widget(background)
+        
+        button = Button(text=button_text, background_color=(0, 0, 0, 0))
+        self.add_widget(button)
+
+
 class VerticalBar(Widget):
     value = NumericProperty(0)
     value_normalized = NumericProperty(0)
@@ -242,13 +258,25 @@ class MainApp(MDApp):
             self.font_scaling = 1
         #print(f"font_scaling: {self.font_scaling*24}")
     
-    def show_popup(self, message):
-        popup = Popup(title=message,
-                      title_size=self.font_scaling*14,
-                      separator_height=0,
-                      title_align="center",
-                      size_hint=(None, None),
-                      size=(self.font_scaling*280, self.font_scaling*100))
+    def show_popup(self, notif_title, notif_message=None):
+        if notif_message is None:
+            #content_label = Label(text=notif_message, font_size= self.font_scaling * 15)
+            popup = Popup(title=notif_title,
+                        title_size=self.font_scaling * 15,
+                        separator_height=0,
+                        title_align="center",
+                        size_hint=(0.9, 0.15))
+        else:
+            content_label = Label(text=notif_message, font_size= self.font_scaling * 15)
+            # content_scrollview = ScrollView(size_hint=(1, None), size=(self.font_scaling * 280, self.font_scaling * 110))
+            # content_scrollview.add_widget(content_label)
+
+            popup = Popup(title=notif_title,
+                        content=content_label,
+                        title_size=self.font_scaling * 16,
+                        separator_height=self.font_scaling * 0.8,
+                        title_align="center",
+                        size_hint=(0.9, 0.4))
         popup.open()
     
     def on_enter_riceStatusScreen(self, storage_type="rice"):
@@ -318,6 +346,21 @@ class MainApp(MDApp):
             self.refillHistoryScreen_initialized = True
         self.root.current = "refill_history_screen"
     
+    def on_enter_notificationScreen(self):
+        # notification_data = [
+        #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
+        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
+        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
+        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
+        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     # Add more notification data as needed
+        # ]
+        notification_data = self.backend.check_storage_notification(self.loggedInUser)
+        print(" Notification Data: ", notification_data)
+        self.populate_notification_scroll_view(notification_data)
+        self.root.current = "notification_screen"
+    
     def get_spinner_transactions(self, text):
         self.today = self.backend.get_current_date()
         self.current_date = self.today.strftime("%Y-%m-%d")
@@ -336,8 +379,11 @@ class MainApp(MDApp):
     
     def on_salesScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Sales History Refreshed")
         self.populate_sales_scroll_view(self.transactions)
-        self.show_popup("Sales History Refreshed")
     
     def on_refillScreen_spinner_select(self, text, spinner_type="storage"):
         # self.transactions = self.get_spinner_transactions(text)
@@ -351,8 +397,11 @@ class MainApp(MDApp):
     
     def on_refillHistoryScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Refill History Refreshed")
         self.populate_refill_history_scroll_view(self.transactions)
-        self.show_popup("Refill History Refreshed")
     
     def on_RefillScreen_add_BTN(self):
         self.storage_type = self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text
@@ -380,6 +429,26 @@ class MainApp(MDApp):
         self.refresh_this = self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text
         self.on_refillHistoryScreen_spinner_select(self.refresh_this)
         # self.show_popup("Refill History Refreshed")
+    
+    def on_NotificationScreen_card_BTN(self, button, notif_title, notif_message):
+        print(" Title: ", notif_title)
+        print(" Message: ", notif_message)
+        self.show_popup(notif_title, notif_message)
+
+
+    def populate_notification_scroll_view(self, notification_data):
+        notification_scrollview = self.root.ids['notification_screen'].ids['NotificationScreen_notificationScrollView']
+        notification_scrollview.clear_widgets()
+
+        for data in notification_data:
+            row_layout = GridLayout(cols=1)
+            notif_title = str(data["notif_title"])
+            notif_message = str(data["notif_message"])
+            print(notif_message)
+            notification_card = ImageButton(source=data["image_src"], allow_stretch=True, keep_ratio=False, on_release=partial(self.on_NotificationScreen_card_BTN, notif_title=notif_title, notif_message=notif_message))
+
+            row_layout.add_widget(notification_card)
+            notification_scrollview.add_widget(row_layout)
 
     
     def populate_sales_scroll_view(self, transactions):
@@ -551,13 +620,19 @@ class MainApp(MDApp):
     
     def on_salesStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Sales Stats Refreshed")
         self.populate_salesStats_scroll_view(self.transactions)
-        self.show_popup("Sales Stats Refreshed")
     
     def on_refillStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Refill Stats Refreshed")
         self.populate_refillStats_scroll_view(self.transactions)
-        self.show_popup("Refill Stats Refreshed")
     
     def on_SalesStatsScreen_refresh_BTN(self):
         self.refresh_this = self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text
@@ -873,6 +948,7 @@ class MainApp(MDApp):
             self.root.ids['login_screen'].ids['login_password'].text = ""
             self.root.ids['login_screen'].ids['login_message'].text = ""
 
+            self.show_popup("Login Successful")
             self.loggedInUser = self.try_login_username
             self.root.current = "main_screen"
             return True
@@ -891,6 +967,7 @@ class MainApp(MDApp):
             self.root.ids['signup_screen'].ids['signup_username'].text = ""
             self.root.ids['signup_screen'].ids['signup_password'].text = ""
             self.root.ids['signup_screen'].ids['signup_message'].text = ""
+            self.show_popup("Signup Successful")
             self.root.current = "startup_screen"
         else:
             self.root.ids['signup_screen'].ids['signup_message'].text = self.try_signup_message

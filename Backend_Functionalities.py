@@ -28,6 +28,9 @@ from google.auth.transport.requests import Request
 
 from firebase_admin import firestore
 
+# Notifications
+from plyer import notification
+
 
 #========== LOGIN_SIGNUP_SYSTEM CLASS ==========#
 """
@@ -123,7 +126,9 @@ class Backend_Functionalities:
             self.storage_ref = db.reference('users').child(self.username).child('storage')
             self.storage_ref.update({
                 'misc': {
-                    'cups': 200,
+                    'cups': 0,
+                    "coin1": 0,
+                    "coin2": 0
                 },
                 'rice': {
                     'premium': 0,
@@ -180,6 +185,32 @@ class Backend_Functionalities:
         self.storage_type = str(storage_type).lower()
         self.storage_ref = db.reference('users').child(self.username).child('storage').child(self.storage_type)
         return self.storage_ref.get()
+    
+    def check_storage_notification(self, username, rice_max=20, misc_max=200, threshold=0.3):
+        # notification_data = [
+        #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
+        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
+        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
+        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
+        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     # Add more notification data as needed
+        # ]
+        self.notification_data = []
+        self.rice_storage = self.retrieve_storage(username, "rice")
+        for key, value in self.rice_storage.items():
+            if (float(value)/rice_max) <= threshold:
+                self.notification_data.append({"notif_title" : f"Rice: {key.capitalize()}", "notif_message" : f"{value} kg left in storage", "image_src" : f"resources/buttons/rice_alert_{key.lower()}.png"})
+
+        self.misc_storage = self.retrieve_storage(username, "misc")
+        for key, value in self.misc_storage.items():
+            self.misc_type = key.lower()
+            if self.misc_type.startswith("coin"):
+                self.misc_type = "coins"
+            if (float(value)/misc_max) <= threshold:
+                self.notification_data.append({"notif_title" : f"Misc: {key.capitalize()}", "notif_message" : f"{value} {key.lower()} left in storage", "image_src" : f"resources/buttons/misc_alert_{self.misc_type}.png"})
+        
+        return self.notification_data
 
     def add_transaction(self, username, transaction_type, item_type, amount):
         self.username = str(username).lower()
@@ -461,6 +492,13 @@ class Backend_Functionalities:
             print("Error removing transaction:", e)
             return False  # Failed to remove transaction
     
+    def push_notifications(self, notif_title, notif_message):
+        notification.notify(title=notif_title,
+                    message=notif_message,
+                    #app_icon="path/to/icon.png",
+                    #timeout=10
+                    )
+    
     
         
     
@@ -507,15 +545,15 @@ if __name__ == "__main__":
     # login_user = pos.firebase_login('test_acc', '12345678')
     # is_success(login_user)
 
-    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 1)
-    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 2)
-    status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 0.5)
-    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 1)
-    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 2)
-    status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 3)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 1)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 2)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-premium", 0.5)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 1)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 2)
+    # status, message = pos.add_transaction("test_acc", "sell", "rice-standard", 3)
 
     # transactions = pos.get_transactions_in_range("test_acc", "2023-01-01", "2023-05-08")
-    transactions = pos.get_transactions_in_range("test_acc", "2023-05-08", "2023-05-08")
+    # transactions = pos.get_transactions_in_range("test_acc", "2023-05-08", "2023-05-08")
     # if len(transactions) == 0:
     #     print("--------------")
     #     print(" No transactions")
@@ -565,3 +603,5 @@ if __name__ == "__main__":
 
     # login_user = pos.firebase_login('rahms', '12345678')
     # is_success(login_user)
+
+    pos.push_notifications("Hey", "Barabaraaaa")
