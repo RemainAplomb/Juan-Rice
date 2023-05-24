@@ -73,10 +73,10 @@ class Backend_Functionalities:
     def check_username_password(self, username, password):
         # Check if username and password are not empty
         if not username:
-            print('Error: empty username')
+            # print('Error: empty username')
             return "Empty username"
         if not password:
-            print('Error: empty password')
+            # print('Error: empty password')
             return "Empty password"
         
         # Check if username contains whitespace
@@ -110,7 +110,7 @@ class Backend_Functionalities:
                 return None, self.prelim_check
             # Check if the username already exists in the database
             if self.username in self.users:
-                print('Error creating user: username already exists')
+                # print('Error creating user: username already exists')
                 return None, "Username already exists"
 
             # Create the new user account
@@ -150,7 +150,7 @@ class Backend_Functionalities:
             return db.reference('users').order_by_child('username').equal_to(self.username).get(), "Successful sign up"
         except Exception as e:
             # Handle error here
-            print('Error creating user: {}'.format(e))
+            # print('Error creating user: {}'.format(e))
             return None, f"Error: {e}"
     
 
@@ -169,15 +169,15 @@ class Backend_Functionalities:
                     return self.user_ref, "Successful log in"
                 else:
                     # Handle error here if password is incorrect
-                    print("Incorrect password: ", self.user_ref[self.uid]['password'])
+                    # print("Incorrect password: ", self.user_ref[self.uid]['password'])
                     return None, "Incorrect password"
             else:
                 # Handle error here if multiple users with same username or no user found
-                print("User not found")
+                # print("User not found")
                 return None, "User not found"
         except Exception as e:
             # Handle error here
-            print('Error logging in: {}'.format(e))
+            # print('Error logging in: {}'.format(e))
             return None, f"Error: {e}"
     
     def retrieve_storage(self, username, storage_type="rice"):
@@ -225,7 +225,8 @@ class Backend_Functionalities:
         try:
             self.amount= float(amount)
         except:
-            print("Invalid Amount")
+            # print("Invalid Amount")
+            return False, "Invalid Amount"
         try:
             # Get the current date
             self.date = datetime.date.today().strftime('%Y-%m-%d')
@@ -235,16 +236,16 @@ class Backend_Functionalities:
                 # print( "Valid transaction type: ", self.transaction_type)
                 pass
             else:
-                print( "Invalid transaction type: ", self.transaction_type)
-                return
+                # print( "Invalid transaction type: ", self.transaction_type)
+                return False, f"Invalid transaction type: {self.transaction_type}"
 
             # Check if the item type is valid
             if self.item_type in self.valid_rice_types or self.item_type in self.valid_misc_types:
                 # print('Valid item  type: ', self.item_type)
                 pass
             else:
-                print('Invalid item type: ', self.item_type)
-                return
+                # print('Invalid item type: ', self.item_type)
+                return False, f'Invalid item type: {self.item_type}'
             
             # Get a reference to the user's transaction history for the current date
             self.transactions_ref = db.reference('users').child(self.username).child('transactions').child(self.date)
@@ -278,7 +279,7 @@ class Backend_Functionalities:
                     self.storage_ref = db.reference('users').child(self.username).child('storage').child('misc').child(self.item_type.split('-')[1])
                     self.storage_ref.set(self.storage_ref.get() - self.amount)
             elif self.transaction_type == 'refill':
-                print(" Item Type: ", self.item_type, self.item_type.split('-')[1])
+                # print(" Item Type: ", self.item_type, self.item_type.split('-')[1])
                 if self.item_type.startswith('rice'):
                     self.storage_ref = db.reference('users').child(self.username).child('storage').child('rice').child(self.item_type.split('-')[1])
                     self.storage_update_amount = self.storage_ref.get() + self.amount
@@ -296,11 +297,11 @@ class Backend_Functionalities:
                         self.storage_ref.set(self.storage_update_amount)
 
             # Print success message
-            print('Transaction added successfully')
+            # print('Transaction added successfully')
             return True, "Successfully Added Transaction"
         except Exception as e:
             # Handle error here
-            print('Error adding transaction: {}'.format(e))
+            # print('Error adding transaction: {}'.format(e))
             return False, e
     
     def get_pricelist(self, username):
@@ -339,7 +340,7 @@ class Backend_Functionalities:
 
         except Exception as e:
             # Handle error here
-            print('Error getting transactions: {}'.format(e))
+            # print('Error getting transactions: {}'.format(e))
             return []
     
     def get_latest_transactions(self, username, num_transactions=30):
@@ -489,7 +490,7 @@ class Backend_Functionalities:
 
         except Exception as e:
             # Handle any errors that occur during the database operation
-            print("Error removing transaction:", e)
+            # print("Error removing transaction:", e)
             return False  # Failed to remove transaction
     
     def push_notifications(self, notif_title, notif_message):

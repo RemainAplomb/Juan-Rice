@@ -33,6 +33,7 @@ import hashlib
 """
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.clock import Clock
 
 from kivy.core.window import Window, Keyboard
 from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTransition
@@ -225,14 +226,25 @@ class MainApp(MDApp):
 
         self.on_resize()
         Window.bind(size=self.on_resize)
+
+        # Schedule the function to be called every 5 minutes
+        Clock.schedule_interval(self.run_update_5mins, 3600)
+        Clock.schedule_interval(self.run_update_1hour, 3600)  # 3600 seconds = 1 hour
         
         return Builder.load_file("main.kv") # BUILD THE KIVY APP
     
     def initialize_resources(self):
-        self.loggedInUser = "test_acc"
-
+        #self.loggedInUser = "test_acc"
         # Get the current working directory
         self.current_directory = os.getcwd()
+
+        self.clear_flags(True)
+    
+
+    def clear_flags(self, clear_user=False):
+        # User related
+        if clear_user:
+            self.loggedInUser = None
 
         # TRANSACTION RELATED
         self.transactions = None
@@ -250,6 +262,32 @@ class MainApp(MDApp):
 
         self.figure = plt.figure()
         pass
+    
+    def run_update_5mins(self, dt):
+        if self.loggedInUser == None:
+            return
+        # print("Updated")
+        self.clear_flags()
+        # notification_data = [
+        #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
+        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
+        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
+        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
+        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
+        #     # Add more notification data as needed
+        # ]
+    
+    def run_update_1hour(self, dt):
+        if self.loggedInUser == None:
+            return
+        self.check_storage_notifications()
+    
+    def check_storage_notifications(self):
+        notification_data = self.backend.check_storage_notification(self.loggedInUser)
+        for data in notification_data:
+            self.backend.push_notifications(data["notif_title"], data["notif_message"])
+
 
     def on_resize(self, *args):
         try:
@@ -260,7 +298,6 @@ class MainApp(MDApp):
     
     def show_popup(self, notif_title, notif_message=None):
         if notif_message is None:
-            #content_label = Label(text=notif_message, font_size= self.font_scaling * 15)
             popup = Popup(title=notif_title,
                         title_size=self.font_scaling * 15,
                         separator_height=0,
@@ -268,9 +305,6 @@ class MainApp(MDApp):
                         size_hint=(0.9, 0.15))
         else:
             content_label = Label(text=notif_message, font_size= self.font_scaling * 15)
-            # content_scrollview = ScrollView(size_hint=(1, None), size=(self.font_scaling * 280, self.font_scaling * 110))
-            # content_scrollview.add_widget(content_label)
-
             popup = Popup(title=notif_title,
                         content=content_label,
                         title_size=self.font_scaling * 16,
@@ -321,16 +355,12 @@ class MainApp(MDApp):
         self.root.current = "sales_screen"
     
     def on_enter_refillScreen(self):
-        # if self.salesScreen_initialized == False:
-        #     self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
-        #     if self.loggedInUser == "":
-        #         self.loggedInUser = "test_acc"
-        #     if self.transactions == None:
-        #         self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
-        #         self.populate_sales_scroll_view(self.transactions)
-        #     else:
-        #         self.on_SalesScreen_refresh_BTN()
-        #     self.salesScreen_initialized = True
+        if self.refillScreen_initialized == False:
+            self.root.ids['refill_screen'].ids['RefillScreen_amountInput'].text = ""
+            self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text = "Rice"
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text = "Premium"
+            self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].values = ["Premium", "Standard", "Cheap"]
+            self.refillScreen_initialized = True
         self.root.current = "refill_screen"
     
     def on_enter_refillHistoryScreen(self):
@@ -357,7 +387,7 @@ class MainApp(MDApp):
         #     # Add more notification data as needed
         # ]
         notification_data = self.backend.check_storage_notification(self.loggedInUser)
-        print(" Notification Data: ", notification_data)
+        #print(" Notification Data: ", notification_data)
         self.populate_notification_scroll_view(notification_data)
         self.root.current = "notification_screen"
     
@@ -379,10 +409,6 @@ class MainApp(MDApp):
     
     def on_salesScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
-        if not self.transactions:
-            self.show_popup("No transactions")
-        else:
-            self.show_popup("Sales History Refreshed")
         self.populate_sales_scroll_view(self.transactions)
     
     def on_refillScreen_spinner_select(self, text, spinner_type="storage"):
@@ -397,26 +423,22 @@ class MainApp(MDApp):
     
     def on_refillHistoryScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
-        if not self.transactions:
-            self.show_popup("No transactions")
-        else:
-            self.show_popup("Refill History Refreshed")
         self.populate_refill_history_scroll_view(self.transactions)
     
     def on_RefillScreen_add_BTN(self):
         self.storage_type = self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text
         self.item_type = self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text
-        print(" Storage Type: ", self.storage_type)
-        print(" Item Type: ", self.item_type)
+        # print(" Storage Type: ", self.storage_type)
+        # print(" Item Type: ", self.item_type)
         try:
             self.refill_amount = float(self.root.ids['refill_screen'].ids['RefillScreen_amountInput'].text)
-            print(" Refill Amount: ", self.refill_amount)
+            # print(" Refill Amount: ", self.refill_amount)
             self.refill_status, self.refill_message = self.backend.add_transaction(self.loggedInUser, "refill", f"{self.storage_type.lower()}-{self.item_type.lower()}", self.refill_amount)
-            print(" Refill Status: ", self.refill_status)
-            print(" Refill Message: ", self.refill_message)
+            # print(" Refill Status: ", self.refill_status)
+            # print(" Refill Message: ", self.refill_message)
             self.show_popup(self.refill_message)
         except:
-            print(" Invalid Amount Input")
+            # print(" Invalid Amount Input")
             self.show_popup("Invalid Amount Input")
         
 
@@ -431,8 +453,8 @@ class MainApp(MDApp):
         # self.show_popup("Refill History Refreshed")
     
     def on_NotificationScreen_card_BTN(self, button, notif_title, notif_message):
-        print(" Title: ", notif_title)
-        print(" Message: ", notif_message)
+        # print(" Title: ", notif_title)
+        # print(" Message: ", notif_message)
         self.show_popup(notif_title, notif_message)
 
 
@@ -444,7 +466,7 @@ class MainApp(MDApp):
             row_layout = GridLayout(cols=1)
             notif_title = str(data["notif_title"])
             notif_message = str(data["notif_message"])
-            print(notif_message)
+            # print(notif_message)
             notification_card = ImageButton(source=data["image_src"], allow_stretch=True, keep_ratio=False, on_release=partial(self.on_NotificationScreen_card_BTN, notif_title=notif_title, notif_message=notif_message))
 
             row_layout.add_widget(notification_card)
@@ -457,6 +479,12 @@ class MainApp(MDApp):
             #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
         else:
             self.transactions = transactions
+        
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Sales History Refreshed")
+
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.price_list = self.backend.get_pricelist(self.loggedInUser)
 
@@ -505,6 +533,12 @@ class MainApp(MDApp):
             #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
         else:
             self.transactions = transactions
+        
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Refill History Refreshed")
+
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         # self.price_list = self.backend.get_pricelist(self.loggedInUser)
 
@@ -620,18 +654,10 @@ class MainApp(MDApp):
     
     def on_salesStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
-        if not self.transactions:
-            self.show_popup("No transactions")
-        else:
-            self.show_popup("Sales Stats Refreshed")
         self.populate_salesStats_scroll_view(self.transactions)
     
     def on_refillStatsScreen_spinner_select(self, text):
         self.transactions = self.get_spinner_transactions(text)
-        if not self.transactions:
-            self.show_popup("No transactions")
-        else:
-            self.show_popup("Refill Stats Refreshed")
         self.populate_refillStats_scroll_view(self.transactions)
     
     def on_SalesStatsScreen_refresh_BTN(self):
@@ -647,14 +673,19 @@ class MainApp(MDApp):
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         else:
             self.transactions = transactions
+        
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Sales Stats Refreshed")
 
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
 
-        print("Sales by Product: ", self.sales_by_product)
-        print("Sales by Date: ", self.sales_by_date)
-        print("Total sales by Date: ", self.total_sales_by_date)
-        print("Transactions: ", self.transactions)
+        # print("Sales by Product: ", self.sales_by_product)
+        # print("Sales by Date: ", self.sales_by_date)
+        # print("Total sales by Date: ", self.total_sales_by_date)
+        # print("Transactions: ", self.transactions)
 
         sales_scroll_view = self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"]
         sales_scroll_view.clear_widgets()
@@ -701,9 +732,9 @@ class MainApp(MDApp):
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             sales = [self.total_sales_by_date[date] for date in sorted_dates]
             self.fig_line_chart_total_sales, ax = plt.subplots()
-            print(" Sorted Dates: ", sorted_dates)
-            print(" Dates: ", dates)
-            print(" Sales: ", sales)
+            # print(" Sorted Dates: ", sorted_dates)
+            # print(" Dates: ", dates)
+            # print(" Sales: ", sales)
             line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 7)
@@ -742,14 +773,19 @@ class MainApp(MDApp):
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         else:
             self.transactions = transactions
+        
+        if not self.transactions:
+            self.show_popup("No transactions")
+        else:
+            self.show_popup("Refill Stats Refreshed")
 
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.refill_by_product, self.refill_by_date, self.total_refill_by_date = self.backend.get_refill(self.refill_transactions)
 
-        print("Refill by Product: ", self.refill_by_product)
-        print("Refill by Date: ", self.refill_by_date)
-        print("Total refill by Date: ", self.total_refill_by_date)
-        print("Transactions: ", self.transactions)
+        # print("Refill by Product: ", self.refill_by_product)
+        # print("Refill by Date: ", self.refill_by_date)
+        # print("Total refill by Date: ", self.total_refill_by_date)
+        # print("Transactions: ", self.transactions)
 
         refill_scroll_view = self.root.ids['refill_stats_screen'].ids["RefillStatsScreen_refillScrollView"]
         refill_scroll_view.clear_widgets()
@@ -796,9 +832,9 @@ class MainApp(MDApp):
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             refill = [self.total_refill_by_date[date] for date in sorted_dates]
             self.fig_line_chart_total_refill, ax = plt.subplots()
-            print(" Sorted Dates: ", sorted_dates)
-            print(" Dates: ", dates)
-            print(" Refill: ", refill)
+            # print(" Sorted Dates: ", sorted_dates)
+            # print(" Dates: ", dates)
+            # print(" Refill: ", refill)
             line = ax.plot_date(sorted_dates, refill, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 7)
@@ -924,6 +960,13 @@ class MainApp(MDApp):
             # Show a message indicating the graphs have been saved
             # print("Graphs saved successfully!")
             self.show_popup("Graphs saved successfully!")
+    
+    def on_MainScreen_signout_BTN(self):
+        self.clear_flags(True)
+        self.show_popup("Succesfully logged out")
+        self.root.current = "startup_screen"
+        self.root.transition.direction = "right"
+        # print(" Logged in user: ", self.loggedInUser)
 
 
     def save_figure(self, fig, save_path):
@@ -950,6 +993,7 @@ class MainApp(MDApp):
 
             self.show_popup("Login Successful")
             self.loggedInUser = self.try_login_username
+            self.check_storage_notifications()
             self.root.current = "main_screen"
             return True
         else:
