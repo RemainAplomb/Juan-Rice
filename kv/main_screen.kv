@@ -65,12 +65,13 @@
 				app.on_enter_notificationScreen()
 		
 		ImageButton:
-			id: M_signOut_BTN
-			source: "resources/buttons/signOut.png"
+			id: M_goBack_BTN
+			source: "resources/buttons/goBack.png"
 			#background_color: 0, 0, 0, 0
 			size_hint : 0.5, 0.08
 			pos_hint: { "x" : 0.265 , "y" : 0.08 }
 			allow_stretch: True
 			keep_ratio: False
 			on_release:
-				app.on_MainScreen_signout_BTN()
+				app.root.current = "machine_screen"
+				#app.on_MainScreen_signout_BTN()

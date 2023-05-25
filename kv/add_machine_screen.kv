@@ -1,0 +1,79 @@
+#===========================================================================================================#
+
+# DEVELOPER:
+#        DIBANSA, RAHMANI 
+#   BRIEF DESCRIPTION OF THE PROGRAM:
+#        This program demonstrates a login and signup system using Firebase for authentication. 
+#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
+#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
+#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
+#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+
+#===========================================================================================================#
+
+#========== ADD MACHINE SCREEN ==========#
+
+<AddMachineScreen>:
+    FloatLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: "resources/backgrounds/login_background.png"
+        TextInput:
+            id: AddMachineScreen_username
+            hint_text: "Machine Name"
+            halign: "center"
+            font_size: app.font_scaling * 24
+            #font_size: 24
+            size_hint : 0.5, 0.08
+            pos_hint: {"x": .265, "y" :.55}
+			write_tab: False
+            multiline: False
+            on_text:
+                self.focus = not self.focus if self.text.endswith("\n") else self.focus
+                #self.text = self.text.replace("\n","")
+        TextInput:
+            id: AddMachineScreen_password
+            password: True
+            hint_text: "Password"
+            halign: "center"
+            font_size: app.font_scaling * 24
+            size_hint : 0.5, 0.08
+            pos_hint: {"x": .265, "y" :.43}
+			write_tab: False
+            multiline: False
+            on_text:
+                self.focus = not self.focus if self.text.endswith("\n") else self.focus
+                #self.text = self.text.replace("\n","")
+        ImageButton:
+            id: LI_AddMachineScreen_BTN
+            source: "resources/buttons/addMachine.png"
+            #background_color: 0, 0, 0, 0
+            size_hint : 0.5, 0.08
+			pos_hint : { "x" : 0.265 , "y" : 0.26 }
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                #app.username = AddMachineScreen_username.text
+                app.try_AddMachineScreen( AddMachineScreen_username.text, AddMachineScreen_password.text )
+
+        ImageButton:
+            id: LI_goBack_BTN
+            source: "resources/buttons/goBack.png"
+            #background_color: 0, 0, 0, 0
+            size_hint : 0.5, 0.08
+			pos_hint : { "x" : 0.265 , "y" : 0.16 }
+            allow_stretch: True
+            keep_ratio: False
+            on_release:
+                app.root.current = "machine_screen"
+                root.manager.transition.direction = "left"
+
+        Label:
+            id: AddMachineScreen_message
+            halign: "center"
+            font_size: app.font_scaling * 18
+            color: (1,0,0,1)
+            size_hint: .3, .1
+            pos_hint: {"x": 0.36 , "y" : 0.33}

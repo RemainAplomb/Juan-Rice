@@ -24,6 +24,8 @@
 #:include kv/startup_screen.kv
 #:include kv/login_screen.kv		
 #:include kv/signup_screen.kv
+#:include kv/machine_screen.kv
+#:include kv/add_machine_screen.kv
 #:include kv/main_screen.kv
 #:include kv/rice_status_screen.kv
 #:include kv/misc_status_screen.kv
@@ -65,6 +67,12 @@ ScreenManager:
 	SignUpScreen:
 		name: "signup_screen"
 		id: signup_screen
+	MachineScreen:
+		name: "machine_screen"
+		id: machine_screen
+	AddMachineScreen:
+		name: "add_machine_screen"
+		id: add_machine_screen
 	MainScreen:
 		name: "main_screen"
 		id: main_screen

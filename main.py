@@ -132,6 +132,11 @@ class LogInScreen( Screen ):
 class SignUpScreen( Screen ):
     pass
 
+class MachineScreen( Screen ):
+    pass
+
+class AddMachineScreen( Screen ):
+    pass
 
 class MainScreen( Screen ):
     pass
@@ -245,6 +250,7 @@ class MainApp(MDApp):
         # User related
         if clear_user:
             self.loggedInUser = None
+            self.loggedInUser2 = None
 
         # TRANSACTION RELATED
         self.transactions = None
@@ -252,6 +258,8 @@ class MainApp(MDApp):
         self.refill_transactions = None
 
         # INITIALIZE
+        self.machineScreen_initialized= False
+
         self.salesScreen_initialized = False
         self.salesStatsScreen_initialized = False
         self.riceStatusScreen_initialized = False
@@ -312,6 +320,17 @@ class MainApp(MDApp):
                         title_align="center",
                         size_hint=(0.9, 0.4))
         popup.open()
+    
+    def on_enter_machineScreen(self):
+        if self.machineScreen_initialized == False:
+            if self.loggedInUser2 == "":
+                self.loggedInUser2 = "test_acc"
+            self.on_MachineScreen_refresh_BTN()
+            self.machineScreen_initialized = True
+        self.root.current = "machine_screen"
+    
+    def on_enter_addMachineScreen(self):
+        self.root.current = "add_machine_screen"
     
     def on_enter_riceStatusScreen(self, storage_type="rice"):
         self.max_storage = 20
@@ -440,6 +459,11 @@ class MainApp(MDApp):
         except:
             # print(" Invalid Amount Input")
             self.show_popup("Invalid Amount Input")
+
+    def on_MachineScreen_refresh_BTN(self):
+        self.machines = self.backend.get_user_machines(self.loggedInUser2)
+        #print("Self Machines", self.machines)
+        self.populate_machine_scroll_view(self.machines)
         
 
     def on_SalesScreen_refresh_BTN(self):
@@ -456,6 +480,133 @@ class MainApp(MDApp):
         # print(" Title: ", notif_title)
         # print(" Message: ", notif_message)
         self.show_popup(notif_title, notif_message)
+    
+    def populate_machine_scroll_view(self, machines):
+        print(" Here's the machine: ", machines)
+        if machines == None:
+            self.machines = self.backend.get_user_machines(self.loggedInUser2)
+            #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
+        else:
+            self.machines = machines
+        
+        if not self.machines:
+            self.show_popup("No Machines")
+            self.scroll_view = self.root.ids['machine_screen'].ids["MachineScreen_machineScrollView"]
+            self.scroll_view.clear_widgets()
+            return
+        else:
+            self.show_popup("Machine List Refreshed")
+
+        # Clear the scroll view
+        self.scroll_view = self.root.ids['machine_screen'].ids["MachineScreen_machineScrollView"]
+        self.scroll_view.clear_widgets()
+
+        for machineId in self.machines.keys():
+            #print(" Machine2 : ", self.machines[machineId])
+            self.temp_machineName = self.machines[machineId]["machineName"]
+            row_layout = GridLayout(cols=3, size_hint_y=None, height=self.font_scaling * 30)
+            row_layout.bind(minimum_height=row_layout.setter('height'))
+
+            machine_name_label = Label(text=self.temp_machineName.capitalize(), font_size=self.font_scaling*12)
+
+            login_machine_button = Button(text="Log in", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
+            login_machine_button.bind(
+                on_release=partial(
+                    self.on_MachineScreen_loginMachine_BTN,
+                    machineName= self.temp_machineName
+                )
+            )
+
+            remove_button = Button(text="Remove", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
+            remove_button.bind(
+                on_release=partial(
+                    self.on_MachineScreen_remove_BTN,
+                    machineName= self.temp_machineName
+                )
+            )        
+
+            row_layout.add_widget(machine_name_label)
+            row_layout.add_widget(remove_button)
+            row_layout.add_widget(login_machine_button)  # Add the remove button to the row
+
+            # Set the size_hint property of each widget to control column widths
+            machine_name_label.size_hint_x = 0.4  # 40% of the row width
+            remove_button.size_hint_x = 0.3 # 30% of the row width
+            login_machine_button.size_hint_x = 0.3  # 30% of the row width
+
+            self.root.ids['machine_screen'].ids["MachineScreen_machineScrollView"].add_widget(row_layout)
+    
+    def on_MachineScreen_loginMachine_BTN(self, button, machineName):
+        row_layout = button.parent
+        self.confirmation_popup = Popup(
+            title='Confirmation',
+            title_size=self.font_scaling*15,
+            content=Label(text='Are you sure you want to access this machine?'),
+            size_hint=(None, None),
+            size=(self.font_scaling*175, self.font_scaling*200),
+            auto_dismiss=False
+        )
+
+        # Create buttons for confirmation popup
+        confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_loginMachine(machineName),
+                                font_size=self.font_scaling * 14,
+                                # size_hint=(0.4, None),
+                                height=self.font_scaling * 40)
+        cancel_button = Button(text='Cancel', on_release=self.confirmation_popup.dismiss,
+                            font_size=self.font_scaling * 14,
+                            # size_hint=(0.4, None),
+                            height=self.font_scaling * 40)
+        
+        # Add buttons to the confirmation popup
+        self.confirmation_popup.content = BoxLayout(orientation='vertical')
+        self.confirmation_popup.content.add_widget(confirm_button)
+        self.confirmation_popup.content.add_widget(cancel_button)
+        
+        # Open the confirmation popup
+        self.confirmation_popup.open()
+    
+    def confirm_loginMachine(self, machineName):
+        self.loggedInUser = machineName
+        self.clear_flags()
+        self.check_storage_notifications()
+        self.confirmation_popup.dismiss()
+        self.root.current = "main_screen"
+    
+
+    def on_MachineScreen_remove_BTN(self, button, machineName):
+        row_layout = button.parent
+        self.confirmation_popup = Popup(
+            title='Confirmation',
+            title_size=self.font_scaling*15,
+            content=Label(text='Are you sure you want to unbind this machine?'),
+            size_hint=(None, None),
+            size=(self.font_scaling*175, self.font_scaling*200),
+            auto_dismiss=False
+        )
+
+        # Create buttons for confirmation popup
+        confirm_button = Button(text='Confirm', on_release=lambda button: self.confirm_removeMachine(machineName),
+                                font_size=self.font_scaling * 14,
+                                # size_hint=(0.4, None),
+                                height=self.font_scaling * 40)
+        cancel_button = Button(text='Cancel', on_release=self.confirmation_popup.dismiss,
+                            font_size=self.font_scaling * 14,
+                            # size_hint=(0.4, None),
+                            height=self.font_scaling * 40)
+        
+        # Add buttons to the confirmation popup
+        self.confirmation_popup.content = BoxLayout(orientation='vertical')
+        self.confirmation_popup.content.add_widget(confirm_button)
+        self.confirmation_popup.content.add_widget(cancel_button)
+        
+        # Open the confirmation popup
+        self.confirmation_popup.open()
+    
+    def confirm_removeMachine(self, machineName):
+        self.confirmation_popup.dismiss()
+        self.backend.remove_machine(self.loggedInUser2, machineName)
+        self.on_MachineScreen_refresh_BTN()
+        #self.show_popup("Machine unbind successful")
 
 
     def populate_notification_scroll_view(self, notification_data):
@@ -984,28 +1135,60 @@ class MainApp(MDApp):
         self.try_login_username = str(username)
         self.try_login_password = str(password)
 
-        self.user, self.try_login_message = self.backend.firebase_login(self.try_login_username, self.try_login_password)
+        self.user, self.try_login_message = self.backend.firebase_login2(self.try_login_username, self.try_login_password)
 
         if self.user is not None:
             self.root.ids['login_screen'].ids['login_username'].text = ""
             self.root.ids['login_screen'].ids['login_password'].text = ""
             self.root.ids['login_screen'].ids['login_message'].text = ""
 
-            self.show_popup("Login Successful")
-            self.loggedInUser = self.try_login_username
-            self.check_storage_notifications()
-            self.root.current = "main_screen"
+            #self.show_popup("Login Successful")
+            self.loggedInUser2 = self.try_login_username
+            #self.check_storage_notifications()
+            #self.root.current = "machine_screen"
+            self.on_enter_machineScreen()
             return True
         else:
             self.root.ids['login_screen'].ids['login_message'].text = self.try_login_message
             #self.root.ids['login_screen'].ids['login_username'].text = ""
             self.root.ids['login_screen'].ids['login_password'].text = ""
     
+    def try_AddMachineScreen(self, username, password):
+        self.try_login_username = str(username)
+        self.try_login_password = str(password)
+
+        self.user, self.try_login_message = self.backend.firebase_login(self.try_login_username, self.try_login_password)
+
+        if self.user is not None:
+            self.root.ids['add_machine_screen'].ids['AddMachineScreen_username'].text = ""
+            self.root.ids['add_machine_screen'].ids['AddMachineScreen_password'].text = ""
+            self.root.ids['add_machine_screen'].ids['AddMachineScreen_message'].text = ""
+
+            print(" User: ", self.user)
+            print(" Username: ", self.user["username"])
+
+            self.machineName = self.user["username"]
+            self.machineStatus = "Active"
+
+            self.machineDetails = { "machineName" : self.machineName, "machineStatus" : self.machineStatus}
+
+            self.backend.add_machine_details(self.loggedInUser2, self.machineName, self.machineDetails)
+
+            #self.show_popup("Machine Added")
+            self.on_MachineScreen_refresh_BTN()
+            #self.loggedInUser = self.try_login_username
+            self.root.current = "machine_screen"
+            return True
+        else:
+            self.root.ids['add_machine_screen'].ids['AddMachineScreen_message'].text = self.try_login_message
+            #self.root.ids['login_screen'].ids['login_username'].text = ""
+            self.root.ids['add_machine_screen'].ids['AddMachineScreen_password'].text = ""
+    
     def try_signup(self, username, password):
         self.try_signup_username = str(username)
         self.try_signup_password = str(password)
 
-        self.user, self.try_signup_message = self.backend.firebase_signup(self.try_signup_username, self.try_signup_password)
+        self.user, self.try_signup_message = self.backend.firebase_signup2(self.try_signup_username, self.try_signup_password)
 
         if self.user is not None:
             self.root.ids['signup_screen'].ids['signup_username'].text = ""

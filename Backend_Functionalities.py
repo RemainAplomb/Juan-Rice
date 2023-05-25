@@ -153,6 +153,36 @@ class Backend_Functionalities:
             # print('Error creating user: {}'.format(e))
             return None, f"Error: {e}"
     
+    def firebase_signup2(self, username, password):
+        self.username = str(username).lower()
+        self.password = str(password)
+        try:
+            self.prelim_check = self.check_username_password(self.username, self.password)
+            if self.prelim_check != True:
+                return None, self.prelim_check
+
+            # Check if the username already exists in the database
+            if self.username in self.users:
+                return None, "Username already exists"
+
+            # Create the new user account
+            self.email = self.username + "@cvsu.juanrice"
+            self.user_ref = db.reference('users2').child(self.username)
+            self.user_ref.set({
+                'username': self.username,
+                'password': self.password,
+                'email': self.email
+            })
+
+            self.users = db.reference('users2').get()
+            self.storage_ref = db.reference('users2').child(self.username).child('machines')
+            if self.storage_ref.get() is None:
+                self.storage_ref.set({})  # Set a placeholder value
+
+            return self.user_ref.get(), "Successful sign up"
+        except Exception as e:
+            return None, f"Error: {e}"
+    
 
     def firebase_login(self, username, password):
         self.username = str(username).lower()
@@ -162,6 +192,33 @@ class Backend_Functionalities:
             if self.prelim_check != True:
                 return None, self.prelim_check
             self.user_ref = db.reference('users').order_by_child('username').equal_to(self.username).get()
+            if self.user_ref is not None and len(self.user_ref) == 1:
+                self.uid = list(self.user_ref.keys())[0]
+                # print(list(user_ref.keys())[0])
+                if self.user_ref[self.uid]['password'] == self.password:
+                    return self.user_ref[self.uid], "Successful log in"
+                    #return db.reference('users').child(username).get(), "Successful log in"
+                else:
+                    # Handle error here if password is incorrect
+                    # print("Incorrect password: ", self.user_ref[self.uid]['password'])
+                    return None, "Incorrect password"
+            else:
+                # Handle error here if multiple users with same username or no user found
+                # print("User not found")
+                return None, "User not found"
+        except Exception as e:
+            # Handle error here
+            # print('Error logging in: {}'.format(e))
+            return None, f"Error: {e}"
+    
+    def firebase_login2(self, username, password):
+        self.username = str(username).lower()
+        self.password = str(password)
+        try:
+            self.prelim_check = self.check_username_password(self.username, self.password)
+            if self.prelim_check != True:
+                return None, self.prelim_check
+            self.user_ref = db.reference('users2').order_by_child('username').equal_to(self.username).get()
             if self.user_ref is not None and len(self.user_ref) == 1:
                 self.uid = list(self.user_ref.keys())[0]
                 # print(list(user_ref.keys())[0])
@@ -179,6 +236,39 @@ class Backend_Functionalities:
             # Handle error here
             # print('Error logging in: {}'.format(e))
             return None, f"Error: {e}"
+    
+
+    
+    def add_machine_details(self, username, machine_id, details):
+        # username = "example_user"
+        # machine_id = "machine1"
+        # details = {
+        #     "name": "Machine 1",
+        #     "location": "Building A",
+        #     "status": "Active"
+        # }
+        # Get a reference to the machines node under the specified user
+        machines_ref = db.reference('users2').child(username).child('machines')
+
+        # Check if the machine ID already exists
+        machine_data = machines_ref.get()
+        if machine_data is not None and machine_id in machine_data:
+            return False, "Machine ID already exists"
+
+        # Set the details for the machine
+        details['machine_id'] = machine_id
+        machines_ref.child(machine_id).set(details)
+
+        return True, "Machine details added successfully"
+    
+    def get_user_machines(self, username):
+        machines_ref = db.reference('users2').child(username).child('machines')
+        machines = machines_ref.get()
+        if machines:
+            return machines
+        else:
+            return None
+
     
     def retrieve_storage(self, username, storage_type="rice"):
         self.username = str(username).lower()
@@ -486,6 +576,17 @@ class Backend_Functionalities:
         try:
             # Remove the transaction with the provided transaction_id
             db.reference('users').child(username).child('transactions').child(date).child(transaction_id).delete()
+            return True  # Transaction successfully removed
+
+        except Exception as e:
+            # Handle any errors that occur during the database operation
+            # print("Error removing transaction:", e)
+            return False  # Failed to remove transaction
+    
+    def remove_machine(self, username, machineName):
+        try:
+            # Remove the transaction with the provided transaction_id
+            db.reference('users2').child(username).child('machines').child(machineName).delete()
             return True  # Transaction successfully removed
 
         except Exception as e:
