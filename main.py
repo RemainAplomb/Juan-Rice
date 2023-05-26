@@ -1,125 +1,146 @@
 #===========================================================================================================#
 """
-    DEVELOPER:
-        DIBANSA, RAHMANI 
-   BRIEF DESCRIPTION OF THE PROGRAM:
+    Developer:
+        Dibansa, Rahmani
+    Designer:
+        Garcia, Bhee Jay 
+    
+    Brief description of the program:
+        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 """
 #===========================================================================================================#
 
+
+
 #========== IMPORTING NECESSARY PYTHON MODULES ==========#
 """
- THE MODULES BELOW ARE BUILT IN PYTHON MODULES.
- THERE'S NO NEED TO INSTALL THESE MODULES.
+    The modules below are built-in Python modules.
+    There's no need to install these.
 """
-import random
-import sys
-import os
-import csv
-import ast
-from datetime import datetime
+import random  # Module for generating random numbers
+import sys  # Module for system-specific parameters and functions
+import os  # Module for interacting with the operating system
+import csv  # Module for reading and writing CSV files
+import ast  # Module for evaluating strings as Python expressions
+from datetime import datetime  # Module for working with dates and times
 
-import hashlib
+import hashlib  # Module for hashing functions
+
 
 
 #==========  IMPORTING NECESSARY KIVY MODULES  ==========#
 """
- THESE MODULES ARE FROM KIVY. THE MODULES REQUIRED CAN BE
- ACQUIRED BY USING THESE COMMANDS:
-       pip install kivy
-       pip install --upgrade pip wheel setuptools
-       pip install docutils pygments pypiwin32
-       pip install kivy.deps.gstreamer
-       pip install kivy.deps.angle
+    These modules are from Kivy. The modules can be acquired
+    by creating a conda environment using the environment.yml
+    or requirements.txt that we have provided in the repository.
 """
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.clock import Clock
+from kivy.app import App  # Base class for creating Kivy applications
+from kivy.lang import Builder  # Module for creating Kivy GUI using a language similar to JSON or CSS
+from kivy.clock import Clock  # Module for scheduling functions to be called at a later time
 
-from kivy.core.window import Window, Keyboard
-from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTransition
+from kivy.core.window import Window, Keyboard  # Module for window management and keyboard events
+from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, CardTransition  # Module for managing multiple screens in Kivy
 
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.relativelayout import RelativeLayout  # Layout that arranges children relative to its own position and size
+from kivy.uix.gridlayout import GridLayout  # Layout that arranges children in a grid-like structure
+from kivy.uix.boxlayout import BoxLayout  # Layout that arranges children in a horizontal or vertical box
+from kivy.uix.floatlayout import FloatLayout  # Layout that allows specifying the position and size of children using floating point values
 
-from kivy.properties import ListProperty
-from kivy.properties import BooleanProperty
-from kivy.properties import NumericProperty
+from kivy.properties import ListProperty  # Property that allows a list value
+from kivy.properties import BooleanProperty  # Property that allows a boolean value
+from kivy.properties import NumericProperty  # Property that allows a numeric value
 
-import kivy.utils
-from kivy.utils import platform
+import kivy.utils  # Module for various utility functions in Kivy
+from kivy.utils import platform  # Function for getting the current platform (e.g., 'android', 'ios', 'win', 'linux')
 
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView  # Scrollable view that contains a single child
+from kivy.uix.popup import Popup  # Modal dialog box that appears on top of the current screen
+from kivy.uix.label import Label  # Widget for displaying text
 
-from kivy.uix.image import Image
-from kivy.graphics import Rectangle, Color, RoundedRectangle
-from kivy.utils import get_color_from_hex
+from kivy.uix.image import Image  # Widget for displaying images
+from kivy.graphics import Rectangle, Color, RoundedRectangle  # Graphics instructions for drawing shapes
+from kivy.utils import get_color_from_hex  # Function for getting a color value from a hexadecimal string
 
-from kivy.uix.widget import Widget
-from kivy.uix.dropdown import DropDown
-from kivy.uix.button import Button
-from kivy.uix.button import ButtonBehavior
+from kivy.uix.widget import Widget  # Base class for creating widgets
+from kivy.uix.dropdown import DropDown  # Widget for creating a drop-down menu
+from kivy.uix.button import Button  # Widget for displaying a button
 
-from kivy.clock import Clock
-from functools import partial
+from kivy.clock import Clock  # Module for scheduling functions to be called at a later time
+from functools import partial  # Function for creating a new function with partially defined arguments
 
-from kivymd.app import MDApp
+from kivymd.app import MDApp  # Base class for creating Material Design applications
 
+
+
+#==========  IMPORTING NECESSARY MATPLOTLIB MODULES  ==========#
+"""
+    These matplotlib modules are used to display graphs
+"""
 # Chart
 import matplotlib
 matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
-
-# from kivymd.uix.chart import PieChart
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas, NavigationToolbar2Kivy, FigureCanvasKivyAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
 
-
 #==========  IMPORTING NECESSARY PYTHON FILES  ==========#
 """
- THESE PYTHON FILES ARE IMPORTED FROM THE SAME FOLDER.
- THE .py FILE NAMES ARE:
-       Backend_Functionalities.py
+    These python files are imported from the repository.
+    Examples of which:
+        Backend_Functionalities.py
 """
-from Backend_Functionalities import *
+from Backend_Functionalities import * # This contains the backend functions that we will need
 
 
 #==========          GLOBAL VARIABLES          ==========#
 """
- THESE ARE THE GLOBAL VARIABLES THAT WILL BE USED BY THE
- PROGRAM'S CLASSES/OBJECTS.
- THE GLOBAL VARIABLES ARE AS FOLLOWS:
-  accounts_list: THIS WILL CONTAIN ALL THE ACCOUNT NAMES.
-  sys.path: THIS WILL CONTAIN THE DIRECTORY OF main.py
+    These are the global variables that will be used by the
+    program.
 """
-WINDOW_MIN_WIDTH = 360
-WINDOW_MIN_HEIGHT = 640
+WINDOW_MIN_WIDTH = 360 # For setting the window's minimum width
+WINDOW_MIN_HEIGHT = 640 # For setting the window's minimum height
 
 #===========================================================================================================#
 
 
+
 #========== CLASSES FOR THE PROGRAM'S SCREENS/WINDOWS ==========#
 """
- EACH OF THESE CLASSES REPRESENTS A SCREEN THAT CAN BE SEEN IN
- THE ACTUAL ANDROID APPLICATION. THESE OBJECTS ARE REFERENCES
- USED BY THE main.kv AND SOME OF ITS SUBSIDIARY .kv FILES.
+    Each of these classes represents a screen that can be seen in
+    the actual application. These objects are references used by 
+    the main.kv and some of its subsidiary .kv files.
 
- THE SCREENS ARE AS FOLLOWS:
-   StartUpScreen: THE VERY FIRST SCREEN THAT WILL WELCOME THE
-                  USER WHEN THE APP RUNS.
-
-   LogInScreen: THE SCREEN THAT FACILITATES THE USER'S LOG IN.
-
-   SignUpScreen: THE SCREEN THAT FACILITATES THE USER'S ACCOUNT
-                 CREATION.
-
-   MainScreen: THIS SCREEN HOLDS A LIST OF WORKOUT ROUTINES.
-               THIS SCREEN CAN ONLY BE ACCESSED AFTER LOGGING IN.
+    The screens are as follows:
+        StartUpScreen: The very first screen that will welcome the 
+            user when the app runs.
+        LogInScreen: The screen that facilitates the user's log in.
+        SignUpScreen: The screen that facilitates the user's sign up.
+        MachineScreen: The main screen that displays information and 
+            controls related to the machines that are binded to the 
+            user's monitoring account.
+        AddMachineScreen: The screen for adding a new vending machine 
+            to the system.
+        MainScreen: The main screen of the application after the user 
+            logs in.
+        RiceStatusScreen: The screen that displays the status and 
+            information of the rice in the vending machine.
+        MiscStatusScreen: The screen that displays the status and 
+            information of miscellaneous items in the vending machine.
+        SalesScreen: The screen that displays the sales information 
+            and transaction logs of the vending machine.
+        SalesStatsScreen: The screen that displays statistics and 
+            charts related to the sales of the vending machine.
+        RefillScreen: The screen for refilling the inventory of the 
+            vending machine.
+        RefillHistoryScreen: The screen that displays the refill 
+            history and logs of the vending machine.
+        RefillStatsScreen: The screen that displays statistics and 
+            charts related to the refill activities of the vending 
+            machine.
+        NotificationScreen: The screen that displays notifications 
+            and alerts related to the vending machine.
 """
 class StartUpScreen( Screen ):
     pass
@@ -165,16 +186,24 @@ class RefillStatsScreen( Screen ):
 class NotificationScreen( Screen ):
     pass
 
-class NotificationCard(FloatLayout):
-    def __init__(self, button_text, image_source, **kwargs):
-        super(NotificationCard, self).__init__(**kwargs)
-        
-        background = Image(source=image_source, allow_stretch=True, keep_ratio=False)
-        self.add_widget(background)
-        
-        button = Button(text=button_text, background_color=(0, 0, 0, 0))
-        self.add_widget(button)
 
+
+#========== CLASSES FOR THE PROGRAM'S KIVY-RELATED ASSET CLASS ==========#
+"""
+    These classes are kivy-related and are used as assets by
+    the front-end.
+
+    The classes are as follows:
+        ImageButton: This class inherits the button behavior and
+            image module from Kivy. It allows our program to have
+            image buttons with custom functionality.
+        VerticalBar: This class is used to display vertical bars
+            in the status-related screens (rice and misc). It
+            provides a visual representation of a value compared
+            to a maximum value.
+"""
+class ImageButton(ButtonBehavior, Image):
+    pass
 
 class VerticalBar(Widget):
     value = NumericProperty(0)
@@ -184,34 +213,18 @@ class VerticalBar(Widget):
 
     def on_value(self, instance, value):
         self.value_normalized = value / self.max if self.max else 0
-            
-
-class MenuDropDown( DropDown ):
-    state = BooleanProperty( False )
+#===========================================================================================================#
 
 
-#========== IMAGE BUTTON CLASS ==========#
-"""
- THIS CLASS IS INHERITS THE BUTTON BEHAVIOUR AND IMAGE
- MODULE FROM KIVY. THIS ALLOWS OUR PROGRAM TO HAVE A
- NEW FUNCTIONALITY THAT CATERS TO IMAGE BUTTONS.
-"""
-class ImageButton(ButtonBehavior, Image):
-    pass
-
-class RootLayout(RelativeLayout):
-	font_scaling = NumericProperty()
-	def on_size(self, *args):
-		self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
 
 #==========               THE APP CLASS               ==========#
 """
- THE CLASS 'MainApp' IS THE CORE OF THE ENTIRE PROGRAM.
- THIS CLASS CONTAINS MOST OF THE METHODS NECESSARY TO RUN THIS
- PROGRAM.
- THE METHODS CONTAINED WITHIN THIS CLASS ARE AS FOLLOWS:
-   build: THE METHOD THAT BUILDS THE KIVY DEPENDENT PROGRAM.
+ The class 'MainApp' is the core of the entire program.
+ This class contains most of the methods necessary to run this
+ program.
 
+ The methods contained within this class are as follows:
+   build: The method that builds the Kivy-dependent program.
 """
 class MainApp(MDApp):
     # APP VARIABLES
@@ -221,14 +234,20 @@ class MainApp(MDApp):
     font_scaling = NumericProperty()
 
     def build(self):
+        """
+        Method that builds the Kivy-dependent program.
+
+        Returns:
+            Builder: The built Kivy app.
+        """
+        # Initialize resources and backend functions
+        self.initialize_resources()
+        self.backend = Backend_Functionalities() 
+
+        # Set the initial window size
         Window.size = (
 			(WINDOW_MIN_WIDTH if Window.width > WINDOW_MIN_WIDTH else Window.width), 
 			(WINDOW_MIN_HEIGHT if Window.height > WINDOW_MIN_HEIGHT else Window.height))
-        
-        self.initialize_resources()
-        self.backend = Backend_Functionalities() # REFERENCE THE LOGIN AND SIGN UP SYSTEM
-        self.menu_dropdown = MenuDropDown() # REFERENCE THE DROP DOWN MENU
-
         self.on_resize()
         Window.bind(size=self.on_resize)
 
@@ -239,14 +258,23 @@ class MainApp(MDApp):
         return Builder.load_file("main.kv") # BUILD THE KIVY APP
     
     def initialize_resources(self):
-        #self.loggedInUser = "test_acc"
+        """
+        Initialize resources required by the app.
+        """
         # Get the current working directory
         self.current_directory = os.getcwd()
 
+        # Clear flags
         self.clear_flags(True)
     
 
     def clear_flags(self, clear_user=False):
+        """
+        Clear flags and variables used by the app.
+
+        Args:
+            clear_user (bool, optional): Whether to clear user-related flags and variables. Defaults to False.
+        """
         # User related
         if clear_user:
             self.loggedInUser = None
@@ -272,39 +300,58 @@ class MainApp(MDApp):
         pass
     
     def run_update_5mins(self, dt):
+        """
+        Method that is called every 5 minutes to perform updates.
+
+        Args:
+            dt (float): Time elapsed since the last call.
+        """
         if self.loggedInUser == None:
             return
-        # print("Updated")
         self.clear_flags()
-        # notification_data = [
-        #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
-        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
-        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
-        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
-        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
-        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
-        #     # Add more notification data as needed
-        # ]
     
     def run_update_1hour(self, dt):
+        """
+        Method that is called every hour to perform updates.
+
+        Args:
+            dt (float): Time elapsed since the last call.
+        """
         if self.loggedInUser == None:
             return
         self.check_storage_notifications()
     
     def check_storage_notifications(self):
+        """
+        Method to check storage notifications and push them to the app.
+
+        This method retrieves storage notifications from the backend and pushes them to the app for display.
+        """
         notification_data = self.backend.check_storage_notification(self.loggedInUser)
         for data in notification_data:
             self.backend.push_notifications(data["notif_title"], data["notif_message"])
 
 
     def on_resize(self, *args):
+        """
+        Method that is called when the window is resized.
+
+        Args:
+            *args: Variable length argument list.
+        """
         try:
             self.font_scaling = min(Window.width/WINDOW_MIN_WIDTH, Window.height/WINDOW_MIN_HEIGHT)
         except ValueError:
             self.font_scaling = 1
-        #print(f"font_scaling: {self.font_scaling*24}")
     
     def show_popup(self, notif_title, notif_message=None):
+        """
+        Method to show a popup with a notification message.
+
+        Args:
+            notif_title (str): The title of the notification.
+            notif_message (str, optional): The message of the notification. Defaults to None.
+        """
         if notif_message is None:
             popup = Popup(title=notif_title,
                         title_size=self.font_scaling * 15,
@@ -322,17 +369,31 @@ class MainApp(MDApp):
         popup.open()
     
     def on_enter_machineScreen(self):
+        """
+        Method called when entering the machine screen.
+
+        If the screen is not initialized, it performs necessary initializations.
+        """
         if self.machineScreen_initialized == False:
             if self.loggedInUser2 == "":
-                self.loggedInUser2 = "test_acc"
+                self.loggedInUser2 = "y"
             self.on_MachineScreen_refresh_BTN()
             self.machineScreen_initialized = True
         self.root.current = "machine_screen"
     
     def on_enter_addMachineScreen(self):
+        """
+        Method called when entering the add machine screen.
+        """
         self.root.current = "add_machine_screen"
     
     def on_enter_riceStatusScreen(self, storage_type="rice"):
+        """
+        Method called when entering the rice status screen.
+
+        Args:
+            storage_type (str, optional): The type of storage. Defaults to "rice".
+        """
         self.max_storage = 20
         self.rice_storage = self.backend.retrieve_storage(self.loggedInUser, storage_type)
 
@@ -347,6 +408,12 @@ class MainApp(MDApp):
         self.root.current = "rice_status_screen"
     
     def on_enter_miscStatusScreen(self, storage_type="misc"):
+        """
+        Method called when entering the miscellaneous status screen.
+
+        Args:
+            storage_type (str, optional): The type of storage. Defaults to "misc".
+        """
         self.max_storage = 200
         self.misc_storage = self.backend.retrieve_storage(self.loggedInUser, storage_type)
 
@@ -361,6 +428,11 @@ class MainApp(MDApp):
         self.root.current = "misc_status_screen"
     
     def on_enter_salesScreen(self):
+        """
+        Method called when entering the sales screen.
+
+        If the screen is not initialized, it performs necessary initializations.
+        """
         if self.salesScreen_initialized == False:
             self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
@@ -374,6 +446,11 @@ class MainApp(MDApp):
         self.root.current = "sales_screen"
     
     def on_enter_refillScreen(self):
+        """
+        Method called when entering the refill screen.
+
+        If the screen is not initialized, it performs necessary initializations.
+        """
         if self.refillScreen_initialized == False:
             self.root.ids['refill_screen'].ids['RefillScreen_amountInput'].text = ""
             self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text = "Rice"
@@ -383,6 +460,10 @@ class MainApp(MDApp):
         self.root.current = "refill_screen"
     
     def on_enter_refillHistoryScreen(self):
+        """
+        This method is called when entering the "refill_history_screen" screen. It initializes the screen, 
+        retrieves the latest transactions for the logged-in user, and populates the UI
+        """
         if self.refillHistoryScreen_initialized == False:
             self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
@@ -396,21 +477,23 @@ class MainApp(MDApp):
         self.root.current = "refill_history_screen"
     
     def on_enter_notificationScreen(self):
-        # notification_data = [
-        #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
-        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
-        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
-        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
-        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
-        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
-        #     # Add more notification data as needed
-        # ]
+        """
+        This method is called when entering the "notification_screen" screen. 
+        It retrieves notification data and populates the UI.
+
+        notification_data = [
+            {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
+            # Add more notification data as needed
+        ]
+        """
         notification_data = self.backend.check_storage_notification(self.loggedInUser)
-        #print(" Notification Data: ", notification_data)
         self.populate_notification_scroll_view(notification_data)
         self.root.current = "notification_screen"
     
     def get_spinner_transactions(self, text):
+        """
+        This method retrieves transactions based on the selected time period (text) and returns the transactions.
+        """
         self.today = self.backend.get_current_date()
         self.current_date = self.today.strftime("%Y-%m-%d")
         self.week_earlier = (self.today - timedelta(days=7)).strftime("%Y-%m-%d")
@@ -427,12 +510,18 @@ class MainApp(MDApp):
         return self.transactions
     
     def on_salesScreen_spinner_select(self, text):
+        """
+        This method is called when selecting an option in the spinner on the "sales_screen" screen. 
+        It retrieves the transactions based on the selected time period and updates the UI.
+        """
         self.transactions = self.get_spinner_transactions(text)
         self.populate_sales_scroll_view(self.transactions)
     
     def on_refillScreen_spinner_select(self, text, spinner_type="storage"):
-        # self.transactions = self.get_spinner_transactions(text)
-        # self.populate_sales_scroll_view(self.transactions)
+        """
+        This method is called when selecting an option in the spinner on the "refill_screen" screen. 
+        It updates the available options in the item spinner based on the selected storage type.
+        """
         if text.lower() == "rice":
             self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text = "Premium"
             self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].values = ["Premium", "Standard", "Cheap"]
@@ -441,48 +530,69 @@ class MainApp(MDApp):
             self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].values = ["Cups", "Coin1", "Coin2"]
     
     def on_refillHistoryScreen_spinner_select(self, text):
+        """
+        This method is called when selecting an option in the spinner on the "refill_history_screen" screen. 
+        It retrieves the transactions based on the selected time period and updates the UI.
+        """
         self.transactions = self.get_spinner_transactions(text)
         self.populate_refill_history_scroll_view(self.transactions)
     
     def on_RefillScreen_add_BTN(self):
+        """
+        This method is called when the "add" button is clicked on the "refill_screen" screen. 
+        It retrieves the selected storage type, item type, and refill amount, and adds a refill transaction.
+        """
         self.storage_type = self.root.ids['refill_screen'].ids['RefillScreen_storageTimeSpinner'].text
         self.item_type = self.root.ids['refill_screen'].ids['RefillScreen_itemTimeSpinner'].text
-        # print(" Storage Type: ", self.storage_type)
-        # print(" Item Type: ", self.item_type)
         try:
             self.refill_amount = float(self.root.ids['refill_screen'].ids['RefillScreen_amountInput'].text)
-            # print(" Refill Amount: ", self.refill_amount)
             self.refill_status, self.refill_message = self.backend.add_transaction(self.loggedInUser, "refill", f"{self.storage_type.lower()}-{self.item_type.lower()}", self.refill_amount)
-            # print(" Refill Status: ", self.refill_status)
-            # print(" Refill Message: ", self.refill_message)
             self.show_popup(self.refill_message)
         except:
-            # print(" Invalid Amount Input")
             self.show_popup("Invalid Amount Input")
 
     def on_MachineScreen_refresh_BTN(self):
+        """
+        This method is called when the "refresh" button is clicked on the "machine_screen" screen. 
+        It retrieves the user's machines and updates the UI.
+        """
         self.machines = self.backend.get_user_machines(self.loggedInUser2)
         #print("Self Machines", self.machines)
         self.populate_machine_scroll_view(self.machines)
         
 
     def on_SalesScreen_refresh_BTN(self):
+        """
+        This method is called when the "refresh" button is clicked on the "sales_screen" screen. 
+        It retrieves the selected time period and updates the UI with the corresponding transactions.
+        """
         self.refresh_this = self.root.ids['sales_screen'].ids['SalesScreen_timeSpinner'].text
         self.on_salesScreen_spinner_select(self.refresh_this)
-        # self.show_popup("Sales History Refreshed")
     
     def on_RefillHistoryScreen_refresh_BTN(self):
+        """
+        This method is called when the "refresh" button is clicked on the "refill_history_screen" screen. 
+        It retrieves the selected time period and updates the UI with the corresponding transactions.
+        """
         self.refresh_this = self.root.ids['refill_history_screen'].ids['RefillHistoryScreen_timeSpinner'].text
         self.on_refillHistoryScreen_spinner_select(self.refresh_this)
-        # self.show_popup("Refill History Refreshed")
     
     def on_NotificationScreen_card_BTN(self, button, notif_title, notif_message):
-        # print(" Title: ", notif_title)
-        # print(" Message: ", notif_message)
+        """
+        This is for showing the details of the notifications present in the
+        notification screen.
+        """
         self.show_popup(notif_title, notif_message)
     
     def populate_machine_scroll_view(self, machines):
-        print(" Here's the machine: ", machines)
+        """
+        This method populates the machine scroll view on the machine screen with the provided 
+        machine data. It first checks if the machines variable is None and retrieves the user's 
+        machines if necessary. Then, it clears the scroll view and iterates over each machine 
+        to create a row layout containing the machine name, remove button, and login button. 
+        The size hints are set to control the column widths, and the row layout is added to the 
+        scroll view.
+        """
         if machines == None:
             self.machines = self.backend.get_user_machines(self.loggedInUser2)
             #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
@@ -537,6 +647,13 @@ class MainApp(MDApp):
             self.root.ids['machine_screen'].ids["MachineScreen_machineScrollView"].add_widget(row_layout)
     
     def on_MachineScreen_loginMachine_BTN(self, button, machineName):
+        """
+        This method is called when the "Log in" button is clicked for a specific machine on the 
+        machine screen. It creates a confirmation popup asking the user if they want to access 
+        the selected machine. The method initializes the confirmation popup with the appropriate 
+        title, content, and buttons for confirmation and cancellation. If the user confirms the 
+        login, the method confirm_loginMachine(machineName) is called.
+        """
         row_layout = button.parent
         self.confirmation_popup = Popup(
             title='Confirmation',
@@ -566,6 +683,11 @@ class MainApp(MDApp):
         self.confirmation_popup.open()
     
     def confirm_loginMachine(self, machineName):
+        """
+        This method is called when the user confirms the login to a machine in the confirmation popup. 
+        It sets the loggedInUser variable to the selected machine name, clears any flags, checks for 
+        storage notifications, dismisses the confirmation popup, and switches the root to the main screen.
+        """
         self.loggedInUser = machineName
         self.clear_flags()
         self.check_storage_notifications()
@@ -574,6 +696,13 @@ class MainApp(MDApp):
     
 
     def on_MachineScreen_remove_BTN(self, button, machineName):
+        """
+        This method is called when the "Remove" button is clicked for a specific machine on the machine 
+        screen. It creates a confirmation popup asking the user if they want to unbind the selected 
+        machine. The method initializes the confirmation popup with the appropriate title, content, and 
+        buttons for confirmation and cancellation. If the user confirms the removal, the method 
+        confirm_removeMachine(machineName) is called.
+        """
         row_layout = button.parent
         self.confirmation_popup = Popup(
             title='Confirmation',
@@ -603,13 +732,24 @@ class MainApp(MDApp):
         self.confirmation_popup.open()
     
     def confirm_removeMachine(self, machineName):
+        """
+        This method is called when the user confirms the removal of a machine in the confirmation popup. 
+        It dismisses the confirmation popup, calls the backend method to remove the machine, refreshes 
+        the machine screen, and updates the notification screen if needed.
+        """
         self.confirmation_popup.dismiss()
         self.backend.remove_machine(self.loggedInUser2, machineName)
         self.on_MachineScreen_refresh_BTN()
-        #self.show_popup("Machine unbind successful")
 
 
     def populate_notification_scroll_view(self, notification_data):
+        """
+        This method populates the notification scroll view on the notification screen with the provided 
+        notification data. It clears the scroll view and iterates over each notification data item to 
+        create a row layout containing an image button representing the notification. The image source, 
+        on-release action, and other properties are set accordingly. The row layout is then added to the 
+        scroll view.
+        """
         notification_scrollview = self.root.ids['notification_screen'].ids['NotificationScreen_notificationScrollView']
         notification_scrollview.clear_widgets()
 
@@ -617,7 +757,6 @@ class MainApp(MDApp):
             row_layout = GridLayout(cols=1)
             notif_title = str(data["notif_title"])
             notif_message = str(data["notif_message"])
-            # print(notif_message)
             notification_card = ImageButton(source=data["image_src"], allow_stretch=True, keep_ratio=False, on_release=partial(self.on_NotificationScreen_card_BTN, notif_title=notif_title, notif_message=notif_message))
 
             row_layout.add_widget(notification_card)
@@ -625,9 +764,17 @@ class MainApp(MDApp):
 
     
     def populate_sales_scroll_view(self, transactions):
+        """
+        This method populates the sales scroll view on the sales screen with the provided transaction data. 
+        If no transactions are provided, it retrieves the latest transactions for the logged-in user from 
+        the backend. It categorizes the transactions into sell and refill transactions, retrieves the price 
+        list from the backend, and clears the scroll view. Then, for each sell transaction, it creates a row 
+        layout containing labels for the transaction details (time, rice type, weight, total) and a remove 
+        button. The row layout is added to the scroll view, and the size hint properties of the widgets are 
+        set to control column widths.
+        """
         if transactions == None:
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
-            #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
         else:
             self.transactions = transactions
         
@@ -679,6 +826,15 @@ class MainApp(MDApp):
             self.root.ids['sales_screen'].ids["SalesScreen_salesScrollView"].add_widget(row_layout)
     
     def populate_refill_history_scroll_view(self, transactions):
+        """
+        This method populates the refill history scroll view on the refill history screen with the provided 
+        transaction data. If no transactions are provided, it retrieves the latest transactions for the 
+        logged-in user from the backend. It categorizes the transactions into sell and refill transactions 
+        and clears the scroll view. Then, for each refill transaction, it creates a row layout containing 
+        labels for the transaction details (time, item type, amount) and a remove button. The row layout is 
+        added to the scroll view, and the size hint properties of the widgets are set to control column 
+        widths.
+        """
         if transactions == None:
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
             #self.transactions2 = self.backend.get_transactions_in_range(username="test_acc", start_date="2023-05-08", end_date="2023-05-08")
@@ -691,7 +847,6 @@ class MainApp(MDApp):
             self.show_popup("Refill History Refreshed")
 
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
-        # self.price_list = self.backend.get_pricelist(self.loggedInUser)
 
         # Clear the scroll view
         self.scroll_view = self.root.ids['refill_history_screen'].ids["RefillHistoryScreen_refillHistoryScrollView"]
@@ -705,7 +860,6 @@ class MainApp(MDApp):
             time_label = Label(text=self.backend.convert_timestamp(transaction['timestamp'], "%m-%d %H:%M"), font_size=self.font_scaling*10)
             item_type_label = Label(text=self.temp_itemType.capitalize(), font_size=self.font_scaling*12)
             amount_type_label = Label(text=str(transaction['amount']), font_size=self.font_scaling*12)
-            # total_type_label = Label(text=str(transaction['amount'] * self.price_list[self.temp_itemType]), font_size=self.font_scaling*12)
 
             remove_button = Button(text="Remove", font_size=self.font_scaling*12, size_hint=(None, None), size=(self.font_scaling*80, self.font_scaling*30))
             remove_button.bind(
@@ -720,19 +874,24 @@ class MainApp(MDApp):
             row_layout.add_widget(time_label)
             row_layout.add_widget(item_type_label)
             row_layout.add_widget(amount_type_label)
-            # row_layout.add_widget(total_type_label)
             row_layout.add_widget(remove_button)  # Add the remove button to the row
 
             # Set the size_hint property of each widget to control column widths
             time_label.size_hint_x = 0.3  # 20% of the row width
-            item_type_label.size_hint_x = 0.25  # 30% of the row width
-            amount_type_label.size_hint_x = 0.25  # 20% of the row width
-            # total_type_label.size_hint_x = 0.175  # 20% of the row width
-            remove_button.size_hint_x = 0.2  # 10% of the row width
+            item_type_label.size_hint_x = 0.25  # 25% of the row width
+            amount_type_label.size_hint_x = 0.25  # 25% of the row width
+            remove_button.size_hint_x = 0.2  # 20% of the row width
 
             self.root.ids['refill_history_screen'].ids["RefillHistoryScreen_refillHistoryScrollView"].add_widget(row_layout)
 
     def remove_transaction(self, button, date, transaction_id, transaction_type="sell"):
+        """
+        This method is called when the user clicks the "Remove" button for a specific transaction. 
+        It retrieves the date, transaction ID, and transaction type (defaulted to "sell") from the 
+        button and calls the backend method to remove the transaction. The method then refreshes the 
+        respective screen (sales screen or refill history screen) by calling the appropriate 
+        method (populate_sales_scroll_view or populate_refill_history_scroll_view).
+        """
         row_layout = button.parent
         self.confirmation_popup = Popup(
             title='Confirmation',
@@ -762,6 +921,12 @@ class MainApp(MDApp):
         self.confirmation_popup.open()
 
     def confirm_remove_transaction(self, row_layout, date, transaction_id, transaction_type = "sell"):
+        """
+        This method is responsible for confirming the removal of a transaction. It takes the row_layout 
+        (widget representing the transaction row), date, transaction_id, and an optional transaction_type 
+        parameter (defaults to "sell"). It removes the transaction from the backend and updates the UI 
+        accordingly.
+        """
         # Close the confirmation popup
         self.confirmation_popup.dismiss()
 
@@ -778,6 +943,11 @@ class MainApp(MDApp):
 
     
     def on_enter_salesStatsScreen(self):
+        """
+        This method is triggered when entering the "salesStatsScreen" screen. It initializes the screen if it 
+        hasn't been initialized before. It sets the default value for the time spinner, retrieves the latest 
+        transactions if they are not already loaded, and populates the sales stats scroll view.
+        """
         if self.salesStatsScreen_initialized == False:
             self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
@@ -791,6 +961,11 @@ class MainApp(MDApp):
         self.root.current = "sales_stats_screen"
     
     def on_enter_refillStatsScreen(self):
+        """
+        This method is triggered when entering the "refillStatsScreen" screen. It initializes the screen if 
+        it hasn't been initialized before. It sets the default value for the time spinner, retrieves the 
+        latest transactions if they are not already loaded, and populates the refill stats scroll view.
+        """
         if self.refillStatsScreen_initialized == False:
             self.root.ids['refill_stats_screen'].ids['RefillStatsScreen_timeSpinner'].text = "Latest"
             if self.loggedInUser == "":
@@ -804,22 +979,46 @@ class MainApp(MDApp):
         self.root.current = "refill_stats_screen"
     
     def on_salesStatsScreen_spinner_select(self, text):
+        """
+        This method is triggered when selecting an option from the time spinner on the salesStatsScreen. 
+        It retrieves the transactions based on the selected time period and populates the sales stats 
+        scroll view.
+        """
         self.transactions = self.get_spinner_transactions(text)
         self.populate_salesStats_scroll_view(self.transactions)
     
     def on_refillStatsScreen_spinner_select(self, text):
+        """
+        This method is triggered when selecting an option from the time spinner on the refillStatsScreen. 
+        It retrieves the transactions based on the selected time period and populates the refill stats 
+        scroll view.
+        """
         self.transactions = self.get_spinner_transactions(text)
         self.populate_refillStats_scroll_view(self.transactions)
     
     def on_SalesStatsScreen_refresh_BTN(self):
+        """
+        This method is triggered when the refresh button is clicked on the salesStatsScreen. It gets the 
+        selected time period from the time spinner and updates the sales stats based on that period.
+        """
         self.refresh_this = self.root.ids['sales_stats_screen'].ids['SalesStatsScreen_timeSpinner'].text
         self.on_salesStatsScreen_spinner_select(self.refresh_this)
     
     def on_RefillStatsScreen_refresh_BTN(self):
+        """
+        This method is triggered when the refresh button is clicked on the refillStatsScreen. It gets the 
+        selected time period from the time spinner and updates the refill stats based on that period.
+        """
         self.refresh_this = self.root.ids['refill_stats_screen'].ids['RefillStatsScreen_timeSpinner'].text
         self.on_refillStatsScreen_spinner_select(self.refresh_this)
     
     def populate_salesStats_scroll_view(self, transactions=None):
+        """
+        This method populates the sales stats scroll view with transaction data. If no transactions are 
+        provided, it retrieves the latest transactions. It categorizes the transactions into sell and 
+        refill transactions, calculates sales by product, sales by date, and total sales by date. It then 
+        generates and displays pie charts, bar charts, and line charts based on the calculated data.
+        """
         if transactions is None:
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         else:
@@ -832,11 +1031,6 @@ class MainApp(MDApp):
 
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.sales_by_product, self.sales_by_date, self.total_sales_by_date = self.backend.get_sales(self.sell_transactions)
-
-        # print("Sales by Product: ", self.sales_by_product)
-        # print("Sales by Date: ", self.sales_by_date)
-        # print("Total sales by Date: ", self.total_sales_by_date)
-        # print("Transactions: ", self.transactions)
 
         sales_scroll_view = self.root.ids['sales_stats_screen'].ids["SalesStatsScreen_salesScrollView"]
         sales_scroll_view.clear_widgets()
@@ -882,10 +1076,8 @@ class MainApp(MDApp):
             sorted_dates = sorted(self.total_sales_by_date.keys())
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             sales = [self.total_sales_by_date[date] for date in sorted_dates]
+
             self.fig_line_chart_total_sales, ax = plt.subplots()
-            # print(" Sorted Dates: ", sorted_dates)
-            # print(" Dates: ", dates)
-            # print(" Sales: ", sales)
             line = ax.plot_date(sorted_dates, sales, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 7)
@@ -920,6 +1112,14 @@ class MainApp(MDApp):
                 sales_scroll_view.add_widget(canvas)
     
     def populate_refillStats_scroll_view(self, transactions=None):
+        """
+        Populates the refill stats scroll view with transaction data.
+
+        Args:
+            transactions (list, optional): List of transactions to populate the scroll view with.
+                If not provided, the latest transactions for the logged-in user will be retrieved.
+                Defaults to None.
+        """
         if transactions is None:
             self.transactions = self.backend.get_latest_transactions(self.loggedInUser)
         else:
@@ -932,11 +1132,6 @@ class MainApp(MDApp):
 
         self.sell_transactions, self.refill_transactions = self.backend.categorize_transactions(self.transactions)
         self.refill_by_product, self.refill_by_date, self.total_refill_by_date = self.backend.get_refill(self.refill_transactions)
-
-        # print("Refill by Product: ", self.refill_by_product)
-        # print("Refill by Date: ", self.refill_by_date)
-        # print("Total refill by Date: ", self.total_refill_by_date)
-        # print("Transactions: ", self.transactions)
 
         refill_scroll_view = self.root.ids['refill_stats_screen'].ids["RefillStatsScreen_refillScrollView"]
         refill_scroll_view.clear_widgets()
@@ -982,10 +1177,8 @@ class MainApp(MDApp):
             sorted_dates = sorted(self.total_refill_by_date.keys())
             dates = [datetime.datetime.strptime(date, '%y-%m-%d').date() for date in sorted_dates]
             refill = [self.total_refill_by_date[date] for date in sorted_dates]
+
             self.fig_line_chart_total_refill, ax = plt.subplots()
-            # print(" Sorted Dates: ", sorted_dates)
-            # print(" Dates: ", dates)
-            # print(" Refill: ", refill)
             line = ax.plot_date(sorted_dates, refill, linestyle='-', fmt='o')
             for label in ax.xaxis.get_ticklabels():
                 label.set_fontsize(self.font_scaling * 7)
@@ -1021,6 +1214,14 @@ class MainApp(MDApp):
     
 
     def on_SalesStatsScreen_export_BTN(self):
+        """
+        This method is called when the export button is clicked on the Sales Stats screen.
+        It saves the sales transaction data to a CSV file and saves the generated graphs as PNG files.
+        The CSV file includes the field names from the sell transactions and the data for each transaction.
+        The graphs include a pie chart, a bar chart, a line chart for total sales by date, and multiple line 
+        charts for sales by rice type. After saving the data and graphs, a popup message is displayed to 
+        indicate the successful saving of the graphs.
+        """
         # Determine the platform
         if os.name == 'posix':  # POSIX systems (Linux, macOS)
             self.save_directory = os.path.join(self.current_directory, "save_directory")
@@ -1063,10 +1264,18 @@ class MainApp(MDApp):
                 self.save_figure(fig_line_chart_rice_type, line_chart_rice_type_path)
 
             # Show a message indicating the graphs have been saved
-            # print("Graphs saved successfully!")
             self.show_popup("Graphs saved successfully!")
     
+
     def on_RefillStatsScreen_export_BTN(self):
+        """
+        This method is called when the export button is clicked on the Refill Stats screen.
+        It saves the refill transaction data to a CSV file and saves the generated graphs as PNG files.
+        The CSV file includes the field names from the refill transactions and the data for each transaction.
+        The graphs include a pie chart, a bar chart, a line chart for total refill by date, and multiple 
+        line charts for refill by item type. After saving the data and graphs, a popup message is displayed 
+        to indicate the successful saving of the graphs.
+        """
         # Determine the platform
         if os.name == 'posix':  # POSIX systems (Linux, macOS)
             self.save_directory = os.path.join(self.current_directory, "save_directory")
@@ -1109,29 +1318,51 @@ class MainApp(MDApp):
                 self.save_figure(fig_line_chart_item_type, line_chart_item_type_path)
 
             # Show a message indicating the graphs have been saved
-            # print("Graphs saved successfully!")
             self.show_popup("Graphs saved successfully!")
     
+
     def on_MainScreen_signout_BTN(self):
+        """
+        This method is called when the signout button is clicked on the Main screen.
+        It clears any flags or session-related data, displays a popup message indicating successful 
+        logout, and transitions the screen back to the startup screen.
+        """
         self.clear_flags(True)
         self.show_popup("Succesfully logged out")
         self.root.current = "startup_screen"
         self.root.transition.direction = "right"
-        # print(" Logged in user: ", self.loggedInUser)
 
 
     def save_figure(self, fig, save_path):
+        """
+        This method is used to save a matplotlib figure (fig) to the specified path (save_path) as a 
+        PNG image. It uses the savefig function from the matplotlib.pyplot module to save the figure.
+        After saving the figure, it closes the figure to release resources.
+        """
         # Save the figure to the specified path
         fig.savefig(save_path)
         plt.close(fig)
 
 
     def prevent_keypress(self, *args):
+        """
+        This method is an event handler that prevents certain keypress events from being processed.
+        It checks if the pressed key is "enter" or "tab" and sets the focus attribute to False.
+        The purpose of this method is to prevent specific keypress events from triggering actions or 
+        changing the focus.
+        """
         keycode = args[1] if len(args) > 1 else None
         if isinstance(keycode, tuple) and keycode[1] in ["enter", "tab"]:
             self.focus = False
      
     def try_login(self, username, password):
+        """
+        This method attempts to log in the user with the provided username and password.
+        It calls the firebase_login2 method from the backend object, passing the username and password.
+        If the login is successful, it clears the login fields and message, sets the logged-in user, 
+        and transitions to the "machine_screen". If the login fails, it displays the login error message 
+        and clears the password field.
+        """
         self.try_login_username = str(username)
         self.try_login_password = str(password)
 
@@ -1154,6 +1385,15 @@ class MainApp(MDApp):
             self.root.ids['login_screen'].ids['login_password'].text = ""
     
     def try_AddMachineScreen(self, username, password):
+        """
+        This method is similar to try_login, but it is used specifically for adding a machine.
+        It attempts to log in the user with the provided username and password using the firebase_login 
+        method from the backend object. If the login is successful, it clears the login fields and message, 
+        retrieves the machine name from the logged-in user data, sets the machine status, and adds the 
+        machine details using the add_machine_details method from the backend object. After adding the 
+        machine details, it refreshes the machine screen and transitions to the "machine_screen".
+        If the login fails, it displays the login error message and clears the password field.
+        """
         self.try_login_username = str(username)
         self.try_login_password = str(password)
 
@@ -1185,6 +1425,13 @@ class MainApp(MDApp):
             self.root.ids['add_machine_screen'].ids['AddMachineScreen_password'].text = ""
     
     def try_signup(self, username, password):
+        """
+        This method attempts to sign up the user with the provided username and password.
+        It calls the firebase_signup2 method from the backend object, passing the username and password.
+        If the signup is successful, it clears the signup fields and message, displays a popup message 
+        indicating successful signup, and transitions to the "startup_screen". If the signup fails, 
+        it displays the signup error message.
+        """
         self.try_signup_username = str(username)
         self.try_signup_password = str(password)
 
