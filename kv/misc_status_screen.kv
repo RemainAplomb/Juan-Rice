@@ -1,18 +1,32 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
-#========== STATUS SCREEN ==========#
-
+#========== MISC STATUS SCREEN ==========#
+# The screen is defined within the MiscStatusScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image for the screen.
+# 
+# Inside the FloatLayout, there is a BoxLayout that contains the status bars for cups, coin1, and coin2.
+# Each status bar is represented by the VerticalBar widget, which is a custom widget defined elsewhere. 
+# It has an ID, a value (percentage), and a color.
+# 
+# The screen also contains several Label widgets to display the titles and labels for various elements.
+# There are two ImageButton widgets for the rice status and menu actions. They have unique IDs, image 
+# sources, size hints, position hints, stretching behavior, and event handling for button release to 
+# navigate to the rice status screen and return to the main screen, respectively.
+# 
+# This screen provides visual representations of the status of cups, coin1, and coin2 using vertical 
+# bars. It also includes labels for the different elements and buttons to navigate to the rice status 
+# screen and return to the main screen.
 <VerticalBar>:
     canvas:
         Color:

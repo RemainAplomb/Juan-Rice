@@ -1,18 +1,52 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
-#========== STATUS SCREEN ==========#
-
+#========== RICE STATUS SCREEN ==========#
+# The screen is defined within the RiceStatusScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image 
+# for the screen.
+# 
+# Inside the FloatLayout, there is a BoxLayout that contains 
+# the main content of the screen.
+# 
+# The BoxLayout has an orientation of 'horizontal' and sets 
+# the spacing and padding values.
+# 
+# The background of the BoxLayout is a rounded rectangle 
+# with a brown color.
+# 
+# Inside the BoxLayout, there are three VerticalBar widgets 
+# representing the status of premium, standard, and cheap 
+# rice storage.
+# 
+# Each VerticalBar widget has an ID, value (indicating the 
+# filled percentage), and color.
+# 
+# There are three Label widgets to display the headings for 
+# rice storage types: premium, standard, and cheap.
+# 
+# Each Label widget has an ID, font properties, size_hint, 
+# position hint, and color.
+# 
+# There are two ImageButton widgets for navigation purposes.
+# Each ImageButton has an ID, image source, size hint, position 
+# hint, stretching behavior, and event handling for button 
+# release to navigate to different screens.
+# 
+# This screen provides a visual representation of the rice storage 
+# status using vertical bars, along with labels for each rice 
+# storage type. It also includes buttons for navigating to the 
+# miscellaneous status screen and the main menu.
 <VerticalBar>:
     canvas:
         Color:

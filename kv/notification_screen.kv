@@ -1,13 +1,12 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
@@ -16,6 +15,38 @@
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
 # Moved to main.kv <SalesOption@SpinnerOption>:
 
+# The screen is defined within the NotificationScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image for the screen.
+# 
+# Inside the FloatLayout, there is a BoxLayout that contains the main 
+# content of the screen.
+# 
+# The BoxLayout has an orientation of 'horizontal' and sets the spacing 
+# and padding values.
+# 
+# The background of the BoxLayout is a rounded rectangle with a brown color.
+# Inside the BoxLayout, there is a ScrollView widget to display notifications.
+# The ScrollView has a custom ScrollEffect for scrolling behavior.
+# 
+# Inside the ScrollView, there is a GridLayout with one column to arrange 
+# the notifications vertically.
+# 
+# The GridLayout has an ID, sets the size_hint_y and height properties, 
+# and adjusts spacing and row sizes.
+# 
+# The notifications are dynamically added to the GridLayout using the 
+# row_default_height and row_default_width properties.
+# 
+# There is a Label widget at the top of the screen to display the 
+# title "NOTIFICATIONS".
+# 
+# There is an ImageButton widget to navigate back to the main screen. It 
+# has an ID, image source, size hint, position hint, stretching behavior, 
+# and event handling for button release to return to the main screen.
+# 
+# This screen provides a scrollable list of notifications, a title label, 
+# and a button to navigate back to the main screen.
 
 <NotificationScreen>:
     FloatLayout:
@@ -62,8 +93,6 @@
 				row_default_height: root.height * 0.1
                 row_default_width: root.width
 				spacing: root.width * 0.01, root.height * 0.01
-
-                
                             
         Label:
             text: "NOTIFICATIONS"

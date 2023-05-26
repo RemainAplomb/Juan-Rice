@@ -1,41 +1,20 @@
 #===========================================================================================================#
 
-#   COURSE-SECTION: BSCPE 2-2
-#   SUBJECT: SOFTWARE DEVELOPMENT
-#   GROUP MEMBERS:
-#           DIBANSA, RAHMANI 
-#           NAVARRO, KAREN
-#           PALATTAO, LARRY SIMOUN
-#           AQUINO, NIKKO LEO
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#           THIS PROGRAM IS A FITNESS APP AIMED TO PROVIDE ITS USERS THE LEISURE AND CONVENIENCE OF FINDING
-#       SUITABLE EXERCISES. THE PROGRAM IS MADE USING PYTHON, KIVY, AND ITS DEPENDENCIES TO PROVIDE A
-#       MULTI-PLATFORM ACCESS TO THE APPLICATION'S USERS.
-#           SAID FITNESS ANDROID APPLICATION IS A MIDTERM PROJECT FOR THE SOFTWARE DEVELOPMENT SUBJECT. THE
-#       PROGRAM WILL BE ASSESSED AND GRADED USING THE ESTABLISHED CRITERIA BEFOREHAND.
-#
-# REPRESENTATION OF THE CONNECTION OF THE PROGRAM'S SCREENS/WINDOWS.
-#	,->startup_screen <--------------------------------( LOG OUT )--------------------------------,
-#	|			↑																				  |
-#	|			'---->login_screen -----> main_screen ------------------------------------------->|
-#	'-----> SignUpScreen				  ↑	 ↑                                                    |
-#										  |	 '--------------------> report_screen --------------->|
-#										  |							 ↑                            |
-#										  '----> selected_workout ---'--------------------------->|
-#										  |  	  |                                               |
-#										  '-------'----> workout_screen                           |
-#										  | 			      |                                   |
-#										  '-------------------'----> congratulation_screen ------>'
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
 
 #========== START UP SCREEN ==========#
-# THIS IS THE VERY FIRST SCREEN THAT THE
-# USER WILL SEE AFTER STARTING THE 
-# APPLICATION. THE SCREEN WELCOMES WILL
-# BE WELCOMING THE USER WOULD HAVE THE 
-# OPTION TO EITHER LOG IN OR SIGN UP.
+# This screen serves as the initial screen of the application, providing options for 
+# the user to either log in or sign up. The login button triggers a navigation to the 
+# "login_screen" while the signup button triggers a navigation to the "signup_screen".
 <StartUpScreen>:
 	FloatLayout:
 		canvas.before:

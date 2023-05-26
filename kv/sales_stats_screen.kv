@@ -1,13 +1,12 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
@@ -16,7 +15,9 @@
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
 # Moved to main.kv <SalesOption@SpinnerOption>:
 
-
+# This screen provides a user interface for viewing and interacting with sales statistics. 
+# It includes options for selecting the time range, refreshing the statistics, exporting the 
+# data, and navigating to other screens. The sales statistics are displayed in a scrollable view.
 <SalesStatsScreen>:
     FloatLayout:
         canvas.before:

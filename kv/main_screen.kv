@@ -1,17 +1,38 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
 #========== MAIN SCREEN SCREEN ==========#
+#	The screen is defined within the MainScreen class.
+#	The root layout of the screen is a FloatLayout.
+#	The canvas.before instruction sets a background image for the screen.
+#
+#	Five ImageButton widgets are defined for various actions:
+#		- "Refill" button: It has a unique ID, image source, size hint, 
+#		  position hint, stretching behavior, and event handling for button 
+#		  release to navigate to the refill screen.
+#		- "Sales" button: It has a unique ID, image source, size hint, position 
+#		  hint, stretching behavior, and event handling for button release to 
+#		  navigate to the sales screen.
+#		- "Rice Status" button: It has a unique ID, image source, size hint, 
+#		  position hint, stretching behavior, and event handling for button 
+#		  release to navigate to the rice status screen.
+#		- "Notifications" button: It has a unique ID, image source, size hint, 
+#		  position hint, stretching behavior, and event handling for button 
+#		  release to navigate to the notification screen.
+#		- "Go Back" button: It has a unique ID, image source, size hint, position 
+#		  hint, stretching behavior, and event handling for button release to 
+#		  navigate back to the machine screen.
+
+This screen provides buttons for different actions, such as refill, sales, rice status, notifications, and going back to the machine screen. The buttons are styled and positioned accordingly.
 <MainScreen>:
 	FloatLayout:
 		canvas.before:

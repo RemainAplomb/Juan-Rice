@@ -1,8 +1,11 @@
 #===========================================================================================================#
 """
-   DEVELOPER:
-        DIBANSA, RAHMANI 
-   Brief description of the program:
+    Developer:
+        Dibansa, Rahmani
+    Designer:
+        Garcia, Bhee Jay 
+    
+    Brief description of the program:
         This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 """
 #===========================================================================================================#

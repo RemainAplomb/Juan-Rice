@@ -1,13 +1,12 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
@@ -16,7 +15,30 @@
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
 # Moved to main.kv <SalesOption@SpinnerOption>:
 
-
+# The screen is defined within the MachineScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image for the screen.
+# 
+# Inside the root layout, there is a BoxLayout that holds the main content of the screen. 
+# It has a horizontal orientation, spacing, padding, size hint, and position hint. It also 
+# has a white rectangle drawn on top of it.
+# 
+# A ScrollView is added to accommodate a scrollable grid of machines. It has a specific size 
+# hint and position hint, and it contains a GridLayout with specific properties for columns, 
+# size hint, height, and minimum height.
+# 
+# Various Label widgets are defined for headings and labels related to the machines. They have 
+# unique IDs, text, font size, font name, size hint, position hint, and color.
+# Two Button widgets are defined for the "Refresh" and "Add Machine" actions. They have unique 
+# IDs, text, font size, font name, size hint, position hint, color, and event handling for 
+# button release.
+# 
+# An ImageButton widget is defined for the "Sign Out" action. It has a unique ID, image source, 
+# size hint, position hint, stretching behavior, and event handling for button release.
+# 
+# This screen displays a list of machines in a scrollable grid. It provides options to refresh 
+# the machine list, add a new machine, and sign out. The labels and buttons are styled and 
+# positioned accordingly.
 <MachineScreen>:
     FloatLayout:
         canvas.before:

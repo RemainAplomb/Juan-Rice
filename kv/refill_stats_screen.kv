@@ -1,13 +1,12 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
@@ -16,7 +15,50 @@
 #:set color_button_pressed (0.659, 0.522, 0.431, 1)  # darker brown
 # Moved to main.kv <RefillOption@SpinnerOption>:
 
-
+# The screen is defined within the RefillStatsScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image 
+# for the screen.
+# 
+# Inside the FloatLayout, there is a BoxLayout that contains 
+# the main content of the screen.
+# 
+# The BoxLayout has an orientation of 'horizontal' and sets 
+# the spacing and padding values.
+# 
+# The background of the BoxLayout is a rounded rectangle with 
+# a brown color.
+# 
+# There is a ScrollView widget to display refill statistics.
+# The ScrollView has an ID, size_hint, position hint, and a 
+# nested GridLayout to contain the refill statistics.
+# 
+# The GridLayout has an ID, number of columns, size_hint_y, 
+# height, row_default_height, and spacing values.
+# 
+# There is a Label widget to display the heading "STATS".
+# There is a Spinner widget to select the time range for the 
+# refill statistics.
+# 
+# The Spinner has an ID, option_cls, option_height, text, font 
+# properties, values, size_hint, position hint, and event 
+# handling for option selection.
+# 
+# There are two Button widgets for refreshing and exporting 
+# the refill statistics.
+# 
+# Each Button has an ID, text, font properties, size_hint, 
+# position hint, and event handling for button release.
+# 
+# There are two ImageButton widgets for navigation purposes.
+# Each ImageButton has an ID, image source, size hint, position 
+# hint, stretching behavior, and event handling for button 
+# release to navigate to different screens.
+# 
+# This screen provides a scrollable view of refill statistics, a 
+# dropdown to select the time range, buttons to refresh and 
+# export the statistics, and buttons to navigate to the refill 
+# screen and refill history screen.
 
 <RefillStatsScreen>:
     FloatLayout:

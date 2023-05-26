@@ -1,13 +1,12 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
@@ -41,21 +40,25 @@
 
 
 #========== THE PROGRAM'S SCREEN MANAGER ==========#
-# THE SCREEN MANAGER FUNCTIONALITY IS RESPONSIBLE
-# FOR THE PROPER REFERENCING OF EACH SCREEN/WINDOW
-# OF THE ANDROID APPLICATION.
+# The screen manager functionality is reponsible for the proper referencing
+# of each screen/window of the monitoring system app. These screens are part 
+# of the screen manager and represent different functionalities of the application.
 #
-# THE SCREENS A	RE AS FOLLOWS:
-#   StartUpScreen: THE VERY FIRST SCREEN THAT WILL WELCOME THE
-#                  USER WHEN THE APP RUNS.
-#
-#   LogInScreen: THE SCREEN THAT FACILITATES THE USER'S LOG IN.
-#
-#   SignUpScreen: THE SCREEN THAT FACILITATES THE USER'S ACCOUNT
-#                 CREATION.
-#
-#   MainScreen: THIS SCREEN HOLDS A LIST OF WORKOUT ROUTINES.
-#               THIS SCREEN CAN ONLY BE ACCESSED AFTER LOGGING IN.
+# THE SCREENS ARE AS FOLLOWS:
+#	- StartUpScreen: The very first screen that will welcome the user when the app runs.
+#	- LogInScreen: The screen that facilitates the user's log in.
+#	- SignUpScreen: The screen that facilitates the user's account creation.
+#	- MainScreen: The screen where the user can choose what to do in a machine's monitoring.
+#	- MachineScreen: The screen that displays the list of machines.
+#	- AddMachineScreen: The screen where the user can add a new machine.
+#	- RiceStatusScreen: The screen that shows the status of rice-related transactions.
+#	- MiscStatusScreen: The screen that shows the status of miscellaneous item transactions.
+#	- SalesScreen: The screen where the user can view and manage sales transactions.
+#	- SalesStatsScreen: The screen that displays statistics and charts related to sales.
+#	- RefillScreen: The screen where the user can refill items in a machine.
+#	- RefillHistoryScreen: The screen that shows the history of refill transactions.
+#	- RefillStatsScreen: The screen that displays statistics and charts related to refill transactions.
+#	- NotificationScreen: The screen that shows notifications to the user.
 ScreenManager:
 	id: screen_manager
 	StartUpScreen:
@@ -102,12 +105,9 @@ ScreenManager:
 		id: notification_screen
 
 #========== SCALE LABEL ==========#
-# THIS IS A CUSTOM WIDGET FUNCTIONALITY
-# THAT INHERITS THE FEATURE OF A LABEL
-# AND A SCALE. USING THIS, THE TEXTS 
-# WOULD DYNAMICALLY ADJUST DEPENDING ON
-# SCREEN SIZE AND THE NUMBER OF TEXT
-# HELD BY THE SCALE LABEL.		
+# This is a custom widget that inherits the features of a label and a scale.
+# It dynamically adjusts the text size based on the screen size and the 
+# length of the text displayed.
 <ScaleLabel@Label>:
     _scale: 1. if self.texture_size[0] < self.width else float(self.width) / self.texture_size[0]
     canvas.before:
@@ -119,6 +119,9 @@ ScreenManager:
     canvas.after:
         PopMatrix
 
+#========== SALES SPINNER OPTION ==========#
+# This is a custom spinner option widget used for sales-related functionality. 
+# It sets the font size, font name, and background color.
 <SalesOption@SpinnerOption>:
     font_size: app.font_scaling * 15
     font_name: "resources/fonts/nunito/Nunito-Light.ttf"
@@ -126,6 +129,9 @@ ScreenManager:
     size_hint: 0.2, None
     size_y: app.font_scaling * 15
 
+#========== REFILL SPINNER OPTION ==========#
+# This is a custom spinner option widget used for refill-related functionality. 
+# It sets the font size, font name, and background color.
 <RefillOption@SpinnerOption>:
     font_size: app.font_scaling * 15
     font_name: "resources/fonts/nunito/Nunito-Light.ttf"

@@ -1,23 +1,23 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
 
 #========== SIGN UP SCREEN ==========#
-# THIS SCREEN ACCOMODATES THE USER'S
-# ACCOUNT CREATION. AFTER SUCCESSFULLY
-# CREATING AN ACCOUNT, THE USER WILL 
-# BE DIRECTED BACK TO THEE START UP 
-# SCREEN.
+# This screen provides a user interface for signing up with a username and password. 
+# The user can enter their desired username and password in the text input fields. 
+# The signup button triggers the try_signup function in the app, passing the entered 
+# username and password as arguments. The go back button navigates back to the startup 
+# screen. The signup message label is used to display any relevant messages or errors 
+# related to the signup process.
 <SignUpScreen>:
 	FloatLayout:
 		canvas.before:

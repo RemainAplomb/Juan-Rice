@@ -1,18 +1,37 @@
 #===========================================================================================================#
 
-# DEVELOPER:
-#        DIBANSA, RAHMANI 
-#   BRIEF DESCRIPTION OF THE PROGRAM:
-#        This program demonstrates a login and signup system using Firebase for authentication. 
-#        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-#        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-#        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-#        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+#    Developer:
+#        Dibansa, Rahmani
+#    Designer:
+#        Garcia, Bhee Jay 
+#    
+#    Brief description of the program:
+#        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 
 #===========================================================================================================#
 
 #========== ADD MACHINE SCREEN ==========#
-
+# - The screen is defined within the AddMachineScreen class.
+# The root layout of the screen is a FloatLayout.
+# The canvas.before instruction sets a background image for the screen.
+# 
+# - Two TextInput widgets are defined for the machine name and password input fields. 
+# They have unique IDs (AddMachineScreen_username and AddMachineScreen_password) and 
+# various properties such as hint text, alignment, font size, size hint, position hint, 
+# and event handling for focusing and text modification.
+# 
+# - Two ImageButton widgets are defined for the "Add Machine" and "Go Back" buttons. 
+# They have unique IDs (LI_AddMachineScreen_BTN and LI_goBack_BTN) and various properties 
+# such as the image source, size hint, position hint, stretching behavior, and event 
+# handling for button release.
+# 
+# - A Label widget is defined for displaying messages or errors. It has a unique ID 
+# (AddMachineScreen_message) and properties such as alignment, font size, color, size 
+# hint, and position hint.
+# 
+# - This screen allows the user to enter the machine name and password, and it provides 
+# buttons for adding a machine or navigating back to the machine screen. The message 
+# label is used to display any relevant messages or errors.
 <AddMachineScreen>:
     FloatLayout:
         canvas.before:
