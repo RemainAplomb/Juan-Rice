@@ -23,6 +23,10 @@ the necessary dependencies
 ```
 conda env create -f environment.yml
 ```
+Btw, you can also use requirements.txt if you want.
+It also contains the information about the needed 
+dependencies
+
 
 ## Check conda environment
 Check whether you have created kivy_env
@@ -42,6 +46,7 @@ download the json files related to the database
 Example filenames:
     - google-services.json
     - juan-rice-firebase-adminsdk-lqyju-c65f392acb.json
+
 
 ## Edit rules of your Firebase realtime database
 This rules are needed so that we can properly perform
@@ -67,6 +72,7 @@ queries related to our needs
   }
 }
 ```
+
 
 ## Needed childrens in the database
 So basically our database is like this
