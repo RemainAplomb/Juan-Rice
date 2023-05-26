@@ -225,6 +225,9 @@ class VerticalBar(Widget):
 
  The methods contained within this class are as follows:
    build: The method that builds the Kivy-dependent program.
+
+   (As for other functions, I decided to put the documentation
+   for it directly. So just read along. Thank you.)
 """
 class MainApp(MDApp):
     # APP VARIABLES

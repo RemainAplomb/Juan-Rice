@@ -2,16 +2,13 @@
 """
    DEVELOPER:
         DIBANSA, RAHMANI 
-   BRIEF DESCRIPTION OF THE PROGRAM:
-        This program demonstrates a login and signup system using Firebase for authentication. 
-        The POS class contains the backend methods for creating new user accounts and signing in existing users. 
-        The program initializes a Firebase app, gets a reference to the database, reads the data from the 'users'
-        node, and prints it to the console. It then signs up a new user and logs in an existing user, and 
-        calls the 'is_success' function to display a message indicating whether the login or signup was successful.
+   Brief description of the program:
+        This program is a monitoring system for a smart vending machine, developed for an undergraduate thesis.
 """
 #===========================================================================================================#
 
 #==========          IMPORTS          ==========#
+# Built-in Python modules
 import time
 import datetime
 from datetime import timedelta, date
@@ -32,20 +29,23 @@ from firebase_admin import firestore
 from plyer import notification
 
 
-#========== LOGIN_SIGNUP_SYSTEM CLASS ==========#
+#========== Backend_Functionalities ==========#
 """
-    THIS POS CLASS HOLDS ALL THE BACK END METHODS
-    AND PROCESSES OF THE LOGIN AND SIGN UP.
+    This Backend_Functionalities class holds 
+    the backend-related functions that we need
     
-    THEE METHODS WITHIN ARE:
-        __init__:   THE METHOD THAT INITIALIZES THE 
-                    VARIABLES THAT WOULD BE USED.
-        firebase_signup: A METHOD TO CREATE A NEW USER ACCOUNT
-        firebase_login: A METHOD TO SIGN IN AN EXISTING USER
+    (As for other functions, I decided to put the documentation
+   for it directly. So just read along. Thank you.)
 
 """
 class Backend_Functionalities:
     def __init__( self ):
+        """
+        Constructor:
+
+        Initializes the Firebase app using the provided credentials and sets up a database reference to the root of the 
+        Firebase database. It also retrieves the list of users from the database.
+        """
         # Initialize Firebase app
         self.cred = credentials.Certificate('juan-rice-firebase-adminsdk-lqyju-c65f392acb.json')
         self.firebase_app = firebase_admin.initialize_app(self.cred, {
@@ -54,6 +54,7 @@ class Backend_Functionalities:
 
         # Get a database reference
         self.ref = db.reference('/')
+
         # Read data from the database
         self.users = self.ref.child('users').get()
 
@@ -61,16 +62,40 @@ class Backend_Functionalities:
         # print("User database: ", self.users)
     
     def get_current_date(self):
+        """
+        Returns the current date as a date object.
+        """
         return date.today()
     
     def convert_timestamp(self, timestamp, timestamp_format = "%m-%d %H:%M"):
+        """
+        Converts a Unix timestamp to a formatted string representation using the specified timestamp_format.
+            - timestamp: The Unix timestamp to convert.
+            - timestamp_format (optional): The format string to use for the converted timestamp. 
+              Default is "%m-%d %H:%M".
+            - Returns the converted timestamp as a string.
+        """
         dt_object = datetime.datetime.fromtimestamp(int(timestamp))
         return dt_object.strftime(timestamp_format)
     
     def convert_to_hash(self, convert_this):
+        """
+        Converts a string to its SHA-256 hash value.
+            - convert_this: The string to convert.
+            - Returns the SHA-256 hash value as a string.
+        This will be used for encrypting passwords.
+        """
         return hashlib.sha256(convert_this.encode()).hexdigest()
     
     def check_username_password(self, username, password):
+        """
+        Checks the validity of a username and password.
+            - username: The username to check.
+            - password: The password to check.
+            - Returns True if the username and password are 
+              valid, or an error message as a string if they are 
+              invalid.
+        """
         # Check if username and password are not empty
         if not username:
             # print('Error: empty username')
@@ -98,10 +123,17 @@ class Backend_Functionalities:
         # if not username.isalnum():
         #     print('Error: username must contain only alphanumeric characters')
         #     return "Username must contain only alphanumeric characters"
-
         return True
 
     def firebase_signup(self, username, password):
+        """
+        Creates a new user account in Firebase.
+            - username: The desired username for the new account.
+            - password: The password for the new account.
+            - Returns a tuple containing the user data as a dictionary and a success message if the
+              signup is successful, or None and an error message if an error occurs.
+            - This is for the accounts for the vending machines
+        """
         self.username = str(username).lower()
         self.password = str(password)
         try:
@@ -154,6 +186,14 @@ class Backend_Functionalities:
             return None, f"Error: {e}"
     
     def firebase_signup2(self, username, password):
+        """
+        Creates a new user account in the 'users2' collection of Firebase.
+            - username: The desired username for the new account.
+            - password: The password for the new account.
+            - Returns a tuple containing the user data as a dictionary and a success message if the signup is successful, 
+              or None and an error message if an error occurs.
+            - This is for the accounts on the monitoring system
+        """
         self.username = str(username).lower()
         self.password = str(password)
         try:
@@ -185,6 +225,14 @@ class Backend_Functionalities:
     
 
     def firebase_login(self, username, password):
+        """
+        Performs a login operation by checking the provided username and password against the 'users' collection in Firebase.
+            - username: The username of the user trying to log in.
+            - password: The password of the user trying to log in.
+            - Returns a tuple containing the user data as a dictionary and a success message if the login is successful, 
+              or None and an error message if an error occurs.
+            - This is for adding/connecting a machine to a specific account in the monitoring system
+        """
         self.username = str(username).lower()
         self.password = str(password)
         try:
@@ -212,6 +260,14 @@ class Backend_Functionalities:
             return None, f"Error: {e}"
     
     def firebase_login2(self, username, password):
+        """
+        Performs a login operation by checking the provided username and password against the 'users2' collection in Firebase.
+            - username: The username of the user trying to log in.
+            - password: The password of the user trying to log in.
+            - Returns a tuple containing the user data as a dictionary and a success message if the login is successful, 
+              or None and an error message if an error occurs.
+            - This is for logging in an account in the monitoring system
+        """
         self.username = str(username).lower()
         self.password = str(password)
         try:
@@ -236,17 +292,25 @@ class Backend_Functionalities:
             # Handle error here
             # print('Error logging in: {}'.format(e))
             return None, f"Error: {e}"
-    
 
     
     def add_machine_details(self, username, machine_id, details):
-        # username = "example_user"
-        # machine_id = "machine1"
-        # details = {
-        #     "name": "Machine 1",
-        #     "location": "Building A",
-        #     "status": "Active"
-        # }
+        """
+        Adds machine details for a specified user in the 'users2' collection of Firebase.
+            - username: The username of the user.
+            - machine_id: The unique ID of the machine.
+            - details: A dictionary containing machine details such as name, location, and status.
+            - Returns a tuple containing a boolean indicating if the machine details were added successfully 
+              and a corresponding message.
+        
+        username = "example_user"
+        machine_id = "machine1"
+        details = {
+            "name": "Machine 1",
+            "location": "Building A",
+            "status": "Active"
+        }
+        """
         # Get a reference to the machines node under the specified user
         machines_ref = db.reference('users2').child(username).child('machines')
 
@@ -258,32 +322,46 @@ class Backend_Functionalities:
         # Set the details for the machine
         details['machine_id'] = machine_id
         machines_ref.child(machine_id).set(details)
-
         return True, "Machine details added successfully"
     
     def get_user_machines(self, username):
+        """
+        Retrieves the machines associated with a specified user from the 'users2' collection of Firebase.
+            - username: The username of the user.
+            - Returns a dictionary containing the machine details, or None if no machines are found.
+            - This will retrieve the machines connected to the given monitoring system's account
+        """
         machines_ref = db.reference('users2').child(username).child('machines')
         machines = machines_ref.get()
         if machines:
             return machines
         else:
             return None
-
     
     def retrieve_storage(self, username, storage_type="rice"):
+        """
+        Retrieves the storage details for a specified user and storage type from the 'users' collection of Firebase.
+            - username: The username of the user.
+            - storage_type: The type of storage (default is "rice").
+            - Returns the storage details or None if the storage type is not found.
+            - This will retrieve the storage details of a given vending machine
+        """
         self.username = str(username).lower()
         self.storage_type = str(storage_type).lower()
         self.storage_ref = db.reference('users').child(self.username).child('storage').child(self.storage_type)
         return self.storage_ref.get()
     
     def check_storage_notification(self, username, rice_max=20, misc_max=200, threshold=0.3):
+        """
+        Checks the storage levels for a specified user and generates a list of storage notifications based on predefined thresholds.
+            - username: The username of the user.
+            - rice_max: The maximum storage limit for rice (default is 20 kg).
+            - misc_max: The maximum storage limit for miscellaneous items (default is 200 units).
+            - threshold: The threshold level (percentage) below which a storage notification is generated (default is 0.3).
+            - Returns a list of dictionaries containing notification data, including the notification title, message, and image source.
+        """
         # notification_data = [
         #     {"notif_title": "Premium Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_premium.png"},
-        #     {"notif_title": "Standard Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_standard.png"},
-        #     {"notif_title": "Cheap Rice", "notif_message": "N kg left in storage.", "image_src" : "resources/buttons/rice_alert_cheap.png"},
-        #     {"notif_title": "Cups", "notif_message": "N cups left in storage.", "image_src" : "resources/buttons/misc_alert_cups.png"},
-        #     {"notif_title": "Coin1", "notif_message": "N coins1 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
-        #     {"notif_title": "Coin2", "notif_message": "N coins2 left in storage.", "image_src" : "resources/buttons/misc_alert_coins.png"},
         #     # Add more notification data as needed
         # ]
         self.notification_data = []
@@ -303,6 +381,15 @@ class Backend_Functionalities:
         return self.notification_data
 
     def add_transaction(self, username, transaction_type, item_type, amount):
+        """
+        Adds a transaction for a specified user to the 'users' collection of Firebase.
+            - username: The username of the user.
+            - transaction_type: The type of transaction (e.g., "refill" or "sell").
+            - item_type: The type of item in the transaction (e.g., "rice-premium" or "misc-coin1").
+            - amount: The amount associated with the transaction.
+            - Returns a tuple containing a boolean indicating if the transaction was added successfully and a 
+              corresponding message.
+        """
         self.username = str(username).lower()
 
         self.transaction_type = transaction_type.lower()
@@ -395,11 +482,23 @@ class Backend_Functionalities:
             return False, e
     
     def get_pricelist(self, username):
+        """
+        Retrieves the price list for a specified user from the 'users' collection of Firebase.
+            - username: The username of the user.
+            - Returns the price list or None if it is not found.
+        """
         self.username = str(username).lower()
         self.price_ref = db.reference('users').child(self.username).child('price')
         return self.price_ref.get()
 
     def get_transactions_in_range(self, username, start_date, end_date):
+        """
+        Retrieves the transactions within a specified date range for a specified user from the 'users' collection of Firebase.
+            - username: The username of the user.
+            - start_date: The start date of the range (format: "YYYY-MM-DD").
+            - end_date: The end date of the range (format: "YYYY-MM-DD").
+            - Returns a list of dictionaries containing transaction data within the specified date range.
+        """
         self.username = str(username).lower()
         self.start_date = start_date
         self.end_date = end_date
@@ -434,6 +533,12 @@ class Backend_Functionalities:
             return []
     
     def get_latest_transactions(self, username, num_transactions=30):
+        """
+        Retrieves the latest transactions for a specified user from the 'users' collection of Firebase.
+            - username: The username of the user.
+            - num_transactions: The number of latest transactions to retrieve (default is 30).
+            - Returns a list of dictionaries containing the latest transactions.
+        """
         self.username = str(username).lower()
         self.transactions_ref = db.reference('users').child(self.username).child('transactions')
 
@@ -461,6 +566,14 @@ class Backend_Functionalities:
         return self.transactions_list
     
     def get_sales(self, transactions):
+        """
+        Calculates the sales data based on the provided transactions.
+        transactions: A list of dictionaries containing transaction data.
+        Returns a tuple containing the sales data:
+            - A dictionary (sales_by_product) with item types as keys and total sales amounts as values.
+            - A nested dictionary (sales_by_date) with item types as outer keys, dates as inner keys, and sales amounts as values.
+            - A dictionary (total_sales_by_date) with dates as keys and total sales amounts as values.
+        """
         self.transactions = transactions
         sales_by_product = {}
         total_sales_by_date = {}
@@ -491,6 +604,14 @@ class Backend_Functionalities:
     
 
     def get_refill(self, transactions):
+        """
+        Calculates the refill data based on the provided transactions.
+        transactions: A list of dictionaries containing transaction data.
+        Returns a tuple containing the refill data:
+            - A dictionary (refill_by_product) with item types as keys and total refill amounts as values.
+            - A nested dictionary (refill_by_date) with item types as outer keys, dates as inner keys, and refill amounts as values.
+            - A dictionary (total_refill_by_date) with dates as keys and total refill amounts as values.
+        """
         self.transactions = transactions
         refill_by_product = {}
         total_refill_by_date = {}
@@ -519,9 +640,15 @@ class Backend_Functionalities:
 
         return refill_by_product, refill_by_date, total_refill_by_date
 
-
     
     def process_transactions(self, transactions):
+        """
+        Processes the transactions and calculates the total sell and refill amounts for each item type.
+        transactions: A list of dictionaries containing transaction data.
+        Returns a tuple containing the summary of sell transactions and refill transactions:
+            - A dictionary (sell_transactions_summary) with item types as keys and total sell amounts as values.
+            - A dictionary (refill_transactions_summary) with item types as keys and total refill amounts as values.
+        """
         self.transactions = transactions
         self.sell_transactions = {}
         self.refill_transactions = {}
@@ -551,6 +678,13 @@ class Backend_Functionalities:
         return sell_transactions_summary, refill_transactions_summary
     
     def categorize_transactions(self, transactions):
+        """
+        Categorizes the transactions into sell transactions and refill transactions based on the item type.
+        transactions: A list of dictionaries containing transaction data.
+        Returns a tuple containing the sell transactions and refill transactions:
+            - A list of dictionaries (sell_transactions) containing sell transactions.
+            - A list of dictionaries (refill_transactions) containing refill transactions.
+        """
         self.transactions = transactions
         self.sell_transactions = []
         self.refill_transactions = []
@@ -573,6 +707,13 @@ class Backend_Functionalities:
         return self.sell_transactions, self.refill_transactions
     
     def remove_transaction(self, username, date, transaction_id):
+        """
+        Removes a specific transaction from the 'users' collection in the Firebase database.
+            - username: The username of the user/ machine name
+            - date: The date of the transaction (format: "YYYY-MM-DD").
+            - transaction_id: The ID of the transaction to be removed.
+            - Returns True if the transaction is successfully removed, False otherwise.
+        """
         try:
             # Remove the transaction with the provided transaction_id
             db.reference('users').child(username).child('transactions').child(date).child(transaction_id).delete()
@@ -584,6 +725,13 @@ class Backend_Functionalities:
             return False  # Failed to remove transaction
     
     def remove_machine(self, username, machineName):
+        """
+        Removes a specific machine from the 'machines' collection in the Firebase database.
+            - username: The username of the user.
+            - machineName: The name of the machine to be removed.
+            - Returns True if the machine is successfully removed, False otherwise.
+            - Unbinds a machine to the monitoring system account
+        """
         try:
             # Remove the transaction with the provided transaction_id
             db.reference('users2').child(username).child('machines').child(machineName).delete()
@@ -595,18 +743,17 @@ class Backend_Functionalities:
             return False  # Failed to remove transaction
     
     def push_notifications(self, notif_title, notif_message):
+        """
+        Displays a notification with the provided title and message using the notification library.
+            - notif_title: The title of the notification.
+            - notif_message: The message of the notification.
+            - No return value.
+        """
         notification.notify(title=notif_title,
                     message=notif_message,
                     #app_icon="path/to/icon.png",
                     #timeout=10
                     )
-    
-    
-        
-    
-    
-    
-
     
 
 
