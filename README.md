@@ -110,6 +110,8 @@ https://juan-rice-default-rtdb.firebaseio.com/
 |
 |
 |---> users2
+|  |
+|  |---> $user_id
 |     |---> email: ""
 |     |---> password: ""
 |     |---> username: ""
