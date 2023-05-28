@@ -57,6 +57,8 @@ from kivy.uix.scrollview import ScrollView  # Scrollable view that contains a si
 from kivy.uix.popup import Popup  # Modal dialog box that appears on top of the current screen
 from kivy.uix.label import Label  # Widget for displaying text
 
+
+from kivy.uix.behaviors import ButtonBehavior # For button behaviour
 from kivy.uix.image import Image  # Widget for displaying images
 from kivy.graphics import Rectangle, Color, RoundedRectangle  # Graphics instructions for drawing shapes
 from kivy.utils import get_color_from_hex  # Function for getting a color value from a hexadecimal string
